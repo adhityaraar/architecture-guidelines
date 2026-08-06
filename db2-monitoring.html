@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Db2 HADR — Monitoring & Alerting — IBM HA &amp; DR Wiki</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/wiki.css"/>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
+      <div class="list-group list-group-flush">
+        <div class="sidebar-section-label">Db2 HADR</div>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">DataStage HA</div>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">watsonx.data</div>
+        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        <div class="sidebar-section-label">General</div>
+        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+      </div>
+    </div>
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      <div class="ml-auto navbar-nav d-flex flex-row">
+        <a class="nav-link px-2" href="index.html">Home</a>
+        <a class="nav-link px-2" href="general-principles.html">Principles</a>
+        <a class="nav-link px-2" href="general-licensing.html">Licensing</a>
+      </div>
+    </nav>
+    <div class="container-fluid p-4">
+      <p class='text-muted' style='font-size:12px;margin-bottom:8px;'>Db2 HADR &rsaquo; Monitoring &amp; Alerting</p>
+
+<h1 class="text-db2">Monitoring &amp; Alerting</h1>
+<hr/>
+<h2>Core Monitoring Query</h2>
+<pre><code>SELECT HADR_ROLE, HADR_STATE, HADR_SYNCMODE, HADR_CONNECT_STATUS,
+       STANDBY_LOG_GAP, STANDBY_REPLAY_DELAY,
+       PRIMARY_LOG_TIME, STANDBY_LOG_TIME,
+       HADR_HEARTBEAT
+FROM TABLE(MON_GET_HADR(NULL)) AS T;</code></pre>
+
+<h2>Alert Thresholds</h2>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Metric</th><th>Normal Value</th><th>Alert Threshold</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td>HADR_STATE</td><td>PEER</td><td>Any state ≠ PEER</td><td>Investigate immediately; check network</td></tr>
+    <tr><td>HADR_CONNECT_STATUS</td><td>CONNECTED</td><td>DISCONNECTED</td><td>Check network; restart HADR if needed</td></tr>
+    <tr><td>STANDBY_LOG_GAP</td><td>0 (SYNC)</td><td>&gt; 1000 pages</td><td>Check bandwidth; consider ASYNC temporarily</td></tr>
+    <tr><td>STANDBY_REPLAY_DELAY</td><td>0 s</td><td>&gt; 10 s (SYNC)</td><td>Standby under load; investigate I/O</td></tr>
+    <tr><td>HADR_HEARTBEAT</td><td>Recent timestamp</td><td>No update &gt; 30 s</td><td>Network issue; check HADR port</td></tr>
+  </tbody>
+</table>
+
+<h2>HADR States Reference</h2>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>PEER</code></td><td>Normal operation — primary and standby fully synchronised</td></tr>
+    <tr><td><code>DISCONNECTED</code></td><td>No TCP connection between primary and standby</td></tr>
+    <tr><td><code>REMOTE_CATCHUP</code></td><td>Standby reconnected and catching up with log gap</td></tr>
+    <tr><td><code>LOCAL_CATCHUP</code></td><td>New primary catching up after takeover</td></tr>
+    <tr><td><code>CONNECTED</code></td><td>Transitional state during startup</td></tr>
+  </tbody>
+</table>
+
+<h2>Automation — Nagios / Prometheus Example</h2>
+<pre><code>#!/bin/bash
+# check_hadr_state.sh — returns CRITICAL if not PEER
+STATE=$(db2 -x "SELECT HADR_STATE FROM TABLE(MON_GET_HADR(NULL)) AS T" | tr -d ' ')
+if [ "$STATE" != "PEER" ]; then
+  echo "CRITICAL: HADR_STATE=$STATE"
+  exit 2
+fi
+echo "OK: HADR_STATE=PEER"
+exit 0</code></pre>
+
+    </div>
+  </div>
+</div>
+<footer class="wiki-footer">Made with IBM Bob</footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/wiki.js"></script>
+</body>
+</html>

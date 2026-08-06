@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>DataStage HA — Pre-Production Checklist — IBM HA &amp; DR Wiki</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/wiki.css"/>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
+      <div class="list-group list-group-flush">
+        <div class="sidebar-section-label">Db2 HADR</div>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">DataStage HA</div>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">watsonx.data</div>
+        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        <div class="sidebar-section-label">General</div>
+        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+      </div>
+    </div>
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      <div class="ml-auto navbar-nav d-flex flex-row">
+        <a class="nav-link px-2" href="index.html">Home</a>
+        <a class="nav-link px-2" href="general-principles.html">Principles</a>
+        <a class="nav-link px-2" href="general-licensing.html">Licensing</a>
+      </div>
+    </nav>
+    <div class="container-fluid p-4">
+      <p class='text-muted' style='font-size:12px;margin-bottom:8px;'>DataStage HA &rsaquo; Pre-Production Checklist</p>
+
+<h1 class="text-ds">DataStage HA Pre-Production Checklist</h1>
+<hr/>
+<ul class="checklist">
+  <li><span class="tick"></span>N+1 worker capacity provisioned and verified under peak load</li>
+  <li><span class="tick"></span>Standby conductor configured and health-checked</li>
+  <li><span class="tick"></span>Conductor failover (auto + manual) tested and RTO measured</li>
+  <li><span class="tick"></span>Repository database deployed with HA (HADR / Patroni / Multi-AZ)</li>
+  <li><span class="tick"></span>Daily metadata export scheduled and off-host storage verified</li>
+  <li><span class="tick"></span>All job assets on shared HA filesystem — no local-only paths</li>
+  <li><span class="tick"></span>Long-running jobs designed with restart / checkpoint capability</li>
+  <li><span class="tick"></span>Client VIP or load balancer configured and tested post-failover</li>
+  <li><span class="tick"></span>Service ports bound to specific IPs — not 0.0.0.0</li>
+  <li><span class="tick"></span>Monitoring alerts configured for conductor, workers, repo DB, filesystem</li>
+  <li><span class="tick"></span>Worker failure scenario tested (job abort + restart)</li>
+  <li><span class="tick"></span>Full DR runbook documented and approved by platform team</li>
+</ul>
+
+    </div>
+  </div>
+</div>
+<footer class="wiki-footer">Made with IBM Bob</footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/wiki.js"></script>
+</body>
+</html>

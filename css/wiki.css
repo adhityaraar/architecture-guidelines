@@ -1,0 +1,97 @@
+/* ── Simple Sidebar (adapted from Start Bootstrap MIT) ── */
+body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-serif; }
+
+#sidebar-wrapper {
+  min-height: 100vh;
+  width: 15rem;
+  margin-left: -15rem;
+  transition: margin .25s ease-out;
+  flex-shrink: 0;
+}
+#sidebar-wrapper .sidebar-heading {
+  padding: 0.875rem 1.25rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: .01em;
+  background: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+}
+#sidebar-wrapper .list-group { width: 15rem; }
+#sidebar-wrapper .list-group-item {
+  font-size: 13.5px;
+  padding: 0.45rem 1.25rem;
+  border-left: none;
+  border-right: none;
+  border-radius: 0;
+}
+#sidebar-wrapper .list-group-item.active,
+#sidebar-wrapper .list-group-item:hover { background: #e9ecef !important; color: #0d6efd; }
+#sidebar-wrapper .list-group-item.active { font-weight: 600; }
+
+.sidebar-section-label {
+  padding: 0.5rem 1.25rem 0.2rem;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: #6c757d;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+  margin-top: 4px;
+}
+
+#page-content-wrapper { min-width: 0; width: 100%; }
+
+#wrapper.toggled #sidebar-wrapper { margin-left: 0; }
+
+@media (min-width: 768px) {
+  #sidebar-wrapper { margin-left: 0; }
+  #wrapper.toggled #sidebar-wrapper { margin-left: -15rem; }
+}
+
+/* ── Product colours ── */
+.text-db2  { color: #7c5cd8 !important; }
+.text-ds   { color: #0f7b5e !important; }
+.text-wx   { color: #0550ae !important; }
+.border-db2 { border-top: 3px solid #7c5cd8 !important; }
+.border-ds  { border-top: 3px solid #0f7b5e !important; }
+.border-wx  { border-top: 3px solid #0550ae !important; }
+.btn-db2 { background: #7c5cd8; color: #fff; border: none; }
+.btn-db2:hover { background: #6748c0; color: #fff; }
+.btn-ds  { background: #0f7b5e; color: #fff; border: none; }
+.btn-ds:hover  { background: #0a5e47; color: #fff; }
+.btn-wx  { background: #0550ae; color: #fff; border: none; }
+.btn-wx:hover  { background: #0440a0; color: #fff; }
+
+/* ── Page content ── */
+h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: .25rem; }
+h2 { font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid #dee2e6; padding-bottom: .4rem; margin: 1.8rem 0 .8rem; }
+h3 { font-size: 1rem; font-weight: 600; margin: 1.2rem 0 .5rem; }
+p  { font-size: 14px; line-height: 1.65; }
+table { font-size: 13px; }
+th { background: #f8f9fa; }
+pre { background: #1f2328; color: #e6edf3; border-radius: 4px; padding: 14px; font-size: 12px; line-height: 1.55; overflow-x: auto; }
+code { font-family: "SF Mono","Fira Code",monospace; }
+
+/* ── Callouts ── */
+.callout { border-left: 4px solid #0d6efd; background: #f0f5ff; padding: 12px 16px; border-radius: 0 4px 4px 0; margin: 14px 0; font-size: 13px; }
+.callout.warn   { border-left-color: #d97706; background: #fffbeb; }
+.callout.danger { border-left-color: #dc3545; background: #fff5f5; }
+.callout.green  { border-left-color: #0f7b5e; background: #f0fdf8; }
+.callout strong { display: block; margin-bottom: 3px; }
+
+/* ── Diagram wrap ── */
+.diagram-wrap { border: 1px solid #dee2e6; border-radius: 4px; background: #f8f9fa; padding: 20px 12px; margin: 14px 0; overflow-x: auto; }
+.diagram-wrap svg { display: block; margin: 0 auto; }
+
+/* ── Checklist ── */
+.checklist { list-style: none; padding: 0; }
+.checklist li { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
+.checklist li:last-child { border-bottom: none; }
+.checklist .tick { width: 16px; height: 16px; border: 1px solid #dee2e6; border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
+
+/* ── Navbar active highlight ── */
+.sidebar-active { font-weight: 600; background: #e9ecef !important; color: #0d6efd !important; }
+
+/* ── Footer ── */
+.wiki-footer { margin-top: 40px; padding: 14px 0; border-top: 1px solid #dee2e6; text-align: center; font-size: 11px; color: #6c757d; }

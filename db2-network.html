@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Db2 HADR — Network & Storage — IBM HA &amp; DR Wiki</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/wiki.css"/>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
+      <div class="list-group list-group-flush">
+        <div class="sidebar-section-label">Db2 HADR</div>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">DataStage HA</div>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">watsonx.data</div>
+        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        <div class="sidebar-section-label">General</div>
+        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+      </div>
+    </div>
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      <div class="ml-auto navbar-nav d-flex flex-row">
+        <a class="nav-link px-2" href="index.html">Home</a>
+        <a class="nav-link px-2" href="general-principles.html">Principles</a>
+        <a class="nav-link px-2" href="general-licensing.html">Licensing</a>
+      </div>
+    </nav>
+    <div class="container-fluid p-4">
+      <p class='text-muted' style='font-size:12px;margin-bottom:8px;'>Db2 HADR &rsaquo; Network &amp; Storage</p>
+
+<h1 class="text-db2">Network &amp; Storage</h1>
+<hr/>
+<div class="callout">
+  <strong>Dedicated HADR Interface Required</strong>
+  Always use a separate NIC for HADR log shipping — isolated from the client-facing interface. Never bind to 0.0.0.0.
+</div>
+
+<h2>Network Requirements</h2>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Parameter</th><th>Requirement</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>HADR_LOCAL_HOST</td><td>Dedicated replication IP</td><td>Never 0.0.0.0</td></tr>
+    <tr><td>HADR_LOCAL_SVC / HADR_REMOTE_SVC</td><td>Dedicated TCP port (e.g. 51000)</td><td>Must match on both ends</td></tr>
+    <tr><td>Bandwidth (SYNC)</td><td>&ge; peak log rate &times; 1.5</td><td>Provision for burst</td></tr>
+    <tr><td>Bandwidth (ASYNC WAN)</td><td>&ge; avg log rate &times; 1.2</td><td>&mdash;</td></tr>
+    <tr><td>Latency (SYNC)</td><td>&lt; 5 ms RTT</td><td>Same DC or dedicated interconnect</td></tr>
+    <tr><td>Latency (ASYNC)</td><td>&lt; 100 ms</td><td>Higher latency = larger log gap</td></tr>
+  </tbody>
+</table>
+
+<h2>Storage Requirements</h2>
+<div class="callout warn">
+  <strong>No Shared Storage</strong>
+  Do NOT share storage between primary and standby. HADR is log-based; shared disks create a single point of failure.
+</div>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Component</th><th>Requirement</th><th>Rationale</th></tr></thead>
+  <tbody>
+    <tr><td>Database files</td><td>Independent per node</td><td>No shared-disk dependency</td></tr>
+    <tr><td>Archive log path</td><td>Same logical path on both nodes</td><td>Required for log-gap catchup</td></tr>
+    <tr><td>Active log path</td><td>Fast storage (NVMe/SSD)</td><td>Directly affects SYNC commit latency</td></tr>
+    <tr><td>Standby layout</td><td>Identical tablespace layout to primary</td><td>Restore of primary backup initialises standby</td></tr>
+  </tbody>
+</table>
+<pre><code>-- Size active logs: measure peak usage first
+db2 "SELECT TOTAL_LOG_USED_KB, TOTAL_LOG_AVAILABLE_KB
+     FROM TABLE(MON_GET_DATABASE(-2)) AS T"
+-- Rule: LOGFILSIZ x LOGPRIMARY >= 1 hour of peak log generation</code></pre>
+
+    </div>
+  </div>
+</div>
+<footer class="wiki-footer">Made with IBM Bob</footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/wiki.js"></script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Db2 HADR — Reference Topologies — IBM HA &amp; DR Wiki</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/wiki.css"/>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
+      <div class="list-group list-group-flush">
+        <div class="sidebar-section-label">Db2 HADR</div>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">DataStage HA</div>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">watsonx.data</div>
+        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        <div class="sidebar-section-label">General</div>
+        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+      </div>
+    </div>
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      <div class="ml-auto navbar-nav d-flex flex-row">
+        <a class="nav-link px-2" href="index.html">Home</a>
+        <a class="nav-link px-2" href="general-principles.html">Principles</a>
+        <a class="nav-link px-2" href="general-licensing.html">Licensing</a>
+      </div>
+    </nav>
+    <div class="container-fluid p-4">
+      <p class='text-muted' style='font-size:12px;margin-bottom:8px;'>Db2 HADR &rsaquo; Reference Topologies</p>
+
+<h1 class="text-db2">Reference Topologies</h1>
+<p class="lead text-muted">Choose the right topology based on DC count, RPO, and RTO requirements.</p>
+<hr/>
+
+<h2>3.1 Single Standby — HA Within DC</h2>
+<div class="diagram-wrap">
+  <svg width="620" height="200" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+    <defs>
+      <marker id="da1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
+      <marker id="da2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c5cd8"/></marker>
+    </defs>
+    <rect x="10" y="70" width="120" height="60" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="70" y="96" text-anchor="middle" font-weight="600">Application</text>
+    <text x="70" y="112" text-anchor="middle" fill="#57606a">Clients</text>
+    <rect x="190" y="70" width="120" height="60" rx="4" fill="#f0f5ff" stroke="#7c5cd8"/>
+    <text x="250" y="96" text-anchor="middle" font-weight="600" fill="#7c5cd8">ACR / VIP</text>
+    <text x="250" y="112" text-anchor="middle" fill="#57606a">HADR Listener</text>
+    <rect x="370" y="20" width="130" height="70" rx="4" fill="#1f2328"/>
+    <text x="435" y="50" text-anchor="middle" font-weight="600" fill="#fff">PRIMARY</text>
+    <text x="435" y="68" text-anchor="middle" fill="#e6edf3" font-size="11">Db2 (Active)</text>
+    <text x="435" y="83" text-anchor="middle" fill="#a78bfa" font-size="11">Site A</text>
+    <rect x="370" y="120" width="130" height="65" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="435" y="150" text-anchor="middle" font-weight="600">STANDBY</text>
+    <text x="435" y="168" text-anchor="middle" fill="#57606a" font-size="11">Db2 (Passive)</text>
+    <text x="435" y="181" text-anchor="middle" fill="#57606a" font-size="11">Site A</text>
+    <line x1="130" y1="100" x2="188" y2="100" stroke="#57606a" stroke-width="1.5" marker-end="url(#da1)"/>
+    <line x1="310" y1="88" x2="368" y2="58" stroke="#57606a" stroke-width="1.5" marker-end="url(#da1)"/>
+    <line x1="310" y1="112" x2="368" y2="145" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#da1)"/>
+    <line x1="435" y1="90" x2="435" y2="118" stroke="#7c5cd8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#da2)"/>
+    <text x="442" y="108" fill="#7c5cd8" font-size="11">Log Ship</text>
+  </svg>
+</div>
+
+<h2>3.2 Cross-Site HA + DR (Recommended for Tier 1)</h2>
+<div class="diagram-wrap">
+  <svg width="620" height="230" viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+    <defs>
+      <marker id="db1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c5cd8"/></marker>
+      <marker id="db2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
+    </defs>
+    <rect x="10" y="10" width="270" height="200" rx="6" fill="none" stroke="#7c5cd8" stroke-dasharray="6,3"/>
+    <text x="145" y="28" text-anchor="middle" fill="#7c5cd8" font-weight="600" font-size="11">SITE A — Primary DC</text>
+    <rect x="340" y="10" width="270" height="200" rx="6" fill="none" stroke="#57606a" stroke-dasharray="6,3"/>
+    <text x="475" y="28" text-anchor="middle" fill="#57606a" font-weight="600" font-size="11">SITE B — DR DC</text>
+    <rect x="50" y="55" width="140" height="70" rx="4" fill="#1f2328"/>
+    <text x="120" y="85" text-anchor="middle" font-weight="600" fill="#fff">PRIMARY</text>
+    <text x="120" y="103" text-anchor="middle" fill="#e6edf3" font-size="11">SYNC / NEARSYNC</text>
+    <text x="120" y="118" text-anchor="middle" fill="#a78bfa" font-size="11">Db2 11.5</text>
+    <rect x="50" y="148" width="140" height="45" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="120" y="171" text-anchor="middle" font-weight="600">STANDBY 1</text>
+    <text x="120" y="187" text-anchor="middle" fill="#57606a" font-size="11">Principal (same DC)</text>
+    <rect x="380" y="75" width="180" height="80" rx="4" fill="#faf5ff" stroke="#7c5cd8"/>
+    <text x="470" y="106" text-anchor="middle" font-weight="600" fill="#7c5cd8">STANDBY 2</text>
+    <text x="470" y="124" text-anchor="middle" fill="#57606a" font-size="11">ASYNC — Remote DR</text>
+    <text x="470" y="139" text-anchor="middle" fill="#57606a" font-size="11">Db2 11.5</text>
+    <line x1="120" y1="125" x2="120" y2="146" stroke="#7c5cd8" stroke-width="1.5" marker-end="url(#db1)"/>
+    <text x="126" y="139" fill="#7c5cd8" font-size="10">SYNC</text>
+    <line x1="190" y1="93" x2="378" y2="113" stroke="#57606a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#db2)"/>
+    <text x="280" y="88" text-anchor="middle" fill="#57606a" font-size="10">ASYNC (WAN)</text>
+  </svg>
+</div>
+
+<h2>Topology Decision Matrix</h2>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Scenario</th><th>Topology</th><th>Sync Mode</th><th>Standbys</th></tr></thead>
+  <tbody>
+    <tr><td>Single DC, host-level HA</td><td>Single Standby</td><td>SYNC or NEARSYNC</td><td>1</td></tr>
+    <tr><td>Two DC, full HA + DR</td><td>Cross-Site</td><td>SYNC (local) + ASYNC (remote)</td><td>2</td></tr>
+    <tr><td>Three DC, max resilience</td><td>Extended cross-site</td><td>SYNC + NEARSYNC + ASYNC</td><td>3</td></tr>
+    <tr><td>Read offload required</td><td>Any + Reads on Standby</td><td>Any</td><td>1–3</td></tr>
+  </tbody>
+</table>
+
+    </div>
+  </div>
+</div>
+<footer class="wiki-footer">Made with IBM Bob</footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/wiki.js"></script>
+</body>
+</html>

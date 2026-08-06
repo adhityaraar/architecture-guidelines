@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>DataStage HA — Topology — IBM HA &amp; DR Wiki</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/wiki.css"/>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
+      <div class="list-group list-group-flush">
+        <div class="sidebar-section-label">Db2 HADR</div>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">DataStage HA</div>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">watsonx.data</div>
+        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        <div class="sidebar-section-label">General</div>
+        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+      </div>
+    </div>
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      <div class="ml-auto navbar-nav d-flex flex-row">
+        <a class="nav-link px-2" href="index.html">Home</a>
+        <a class="nav-link px-2" href="general-principles.html">Principles</a>
+        <a class="nav-link px-2" href="general-licensing.html">Licensing</a>
+      </div>
+    </nav>
+    <div class="container-fluid p-4">
+      <p class='text-muted' style='font-size:12px;margin-bottom:8px;'>DataStage HA &rsaquo; HA Topology</p>
+
+<h1 class="text-ds">HA Topology</h1>
+<hr/>
+<div class="diagram-wrap">
+  <svg width="620" height="280" viewBox="0 0 620 280" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+    <defs>
+      <marker id="ds1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#0f7b5e"/></marker>
+      <marker id="ds2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
+    </defs>
+    <rect x="250" y="10" width="120" height="45" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="310" y="32" text-anchor="middle" font-weight="600">Clients / Apps</text>
+    <text x="310" y="48" text-anchor="middle" fill="#57606a" font-size="11">Designer / API</text>
+    <rect x="225" y="78" width="170" height="40" rx="4" fill="#f0fdf8" stroke="#0f7b5e"/>
+    <text x="310" y="99" text-anchor="middle" font-weight="600" fill="#0f7b5e">Load Balancer / VIP</text>
+    <text x="310" y="112" text-anchor="middle" fill="#57606a" font-size="11">Project Services Layer</text>
+    <rect x="70" y="148" width="150" height="55" rx="4" fill="#1f2328"/>
+    <text x="145" y="172" text-anchor="middle" fill="#fff" font-weight="600">CONDUCTOR (Active)</text>
+    <text x="145" y="189" text-anchor="middle" fill="#6ee7c7" font-size="11">Engine Tier — Primary</text>
+    <rect x="400" y="148" width="150" height="55" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="475" y="172" text-anchor="middle" font-weight="600">CONDUCTOR (Standby)</text>
+    <text x="475" y="189" text-anchor="middle" fill="#57606a" font-size="11">Engine Tier — Passive</text>
+    <rect x="20" y="232" width="90" height="38" rx="4" fill="#f0fdf8" stroke="#0f7b5e"/>
+    <text x="65" y="255" text-anchor="middle" fill="#0f7b5e" font-weight="600">Worker 1</text>
+    <rect x="125" y="232" width="90" height="38" rx="4" fill="#f0fdf8" stroke="#0f7b5e"/>
+    <text x="170" y="255" text-anchor="middle" fill="#0f7b5e" font-weight="600">Worker 2</text>
+    <rect x="230" y="232" width="90" height="38" rx="4" fill="#f0fdf8" stroke="#0f7b5e"/>
+    <text x="275" y="255" text-anchor="middle" fill="#0f7b5e" font-weight="600">Worker 3</text>
+    <rect x="330" y="232" width="90" height="38" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="375" y="251" text-anchor="middle" fill="#57606a" font-weight="600">Worker N+1</text>
+    <text x="375" y="265" text-anchor="middle" fill="#57606a" font-size="10">(spare)</text>
+    <rect x="435" y="232" width="160" height="38" rx="4" fill="#faf5ff" stroke="#7c5cd8"/>
+    <text x="515" y="251" text-anchor="middle" fill="#7c5cd8" font-weight="600">Repository DB (HA)</text>
+    <text x="515" y="265" text-anchor="middle" fill="#57606a" font-size="10">Db2 HADR / Postgres repl.</text>
+    <line x1="310" y1="55" x2="310" y2="76" stroke="#57606a" stroke-width="1.5" marker-end="url(#ds2)"/>
+    <line x1="280" y1="118" x2="190" y2="146" stroke="#0f7b5e" stroke-width="1.5" marker-end="url(#ds1)"/>
+    <line x1="340" y1="118" x2="430" y2="146" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ds2)"/>
+    <line x1="145" y1="203" x2="65" y2="230" stroke="#0f7b5e" stroke-width="1.5" marker-end="url(#ds1)"/>
+    <line x1="145" y1="203" x2="170" y2="230" stroke="#0f7b5e" stroke-width="1.5" marker-end="url(#ds1)"/>
+    <line x1="145" y1="203" x2="275" y2="230" stroke="#0f7b5e" stroke-width="1.5" marker-end="url(#ds1)"/>
+    <line x1="475" y1="203" x2="375" y2="230" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#ds2)"/>
+    <line x1="475" y1="203" x2="515" y2="230" stroke="#7c5cd8" stroke-width="1.5" marker-end="url(#ds1)"/>
+  </svg>
+</div>
+<p>The active conductor dispatches work to the worker pool. The standby conductor mirrors configuration and is ready to take over. The repository is backed by a highly available database (Db2 HADR or PostgreSQL streaming replication).</p>
+
+    </div>
+  </div>
+</div>
+<footer class="wiki-footer">Made with IBM Bob</footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/wiki.js"></script>
+</body>
+</html>

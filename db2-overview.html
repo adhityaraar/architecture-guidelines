@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+  <title>Db2 HADR — Overview — IBM HA &amp; DR Wiki</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/wiki.css"/>
+</head>
+<body>
+<div class="d-flex" id="wrapper">
+
+    <div class="bg-light border-right" id="sidebar-wrapper">
+      <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
+      <div class="list-group list-group-flush">
+        <div class="sidebar-section-label">Db2 HADR</div>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">DataStage HA</div>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        <div class="sidebar-section-label">watsonx.data</div>
+        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        <div class="sidebar-section-label">General</div>
+        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+      </div>
+    </div>
+  <div id="page-content-wrapper">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      <div class="ml-auto navbar-nav d-flex flex-row">
+        <a class="nav-link px-2" href="index.html">Home</a>
+        <a class="nav-link px-2" href="general-principles.html">Principles</a>
+        <a class="nav-link px-2" href="general-licensing.html">Licensing</a>
+      </div>
+    </nav>
+    <div class="container-fluid p-4">
+      <p class='text-muted' style='font-size:12px;margin-bottom:8px;'>Db2 HADR &rsaquo; Overview</p>
+
+<h1 class="text-db2">Db2 HADR — Overview</h1>
+<p class="lead text-muted">IBM Db2 High Availability Disaster Recovery (HADR)</p>
+<hr/>
+<p>IBM Db2 HADR replicates log records from a <strong>primary</strong> to one or more <strong>standby</strong> databases over TCP. The standby continuously replays logs; on primary failure it is promoted (takeover) to become the new primary.</p>
+
+<h2>Goals &amp; Targets</h2>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+  <tbody>
+    <tr><td>RPO (SYNC mode)</td><td><strong>Zero</strong></td></tr>
+    <tr><td>RPO (NEARSYNC mode)</td><td>&lt; 2 seconds</td></tr>
+    <tr><td>RTO (automatic takeover)</td><td>&lt; 30 seconds</td></tr>
+    <tr><td>Availability</td><td>99.99%</td></tr>
+    <tr><td>Maximum standbys</td><td>3 (Db2 11.1+)</td></tr>
+  </tbody>
+</table>
+
+<h2>Core Concepts</h2>
+<table class="table table-bordered table-sm">
+  <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+  <tbody>
+    <tr><td>Primary Database</td><td>Active instance accepting read/write workloads; ships logs to standby(s).</td></tr>
+    <tr><td>Standby Database</td><td>Continuously updated replica; can take over the primary role.</td></tr>
+    <tr><td>Log Shipping</td><td>Redo log records transmitted from primary to standby over TCP.</td></tr>
+    <tr><td>Takeover</td><td>Promotion of standby to primary — manual, by force, or automatic.</td></tr>
+    <tr><td>Log Gap</td><td>Difference between primary and standby log sequence number (LSN).</td></tr>
+    <tr><td>ACR</td><td>Automatic Client Reroute — redirects clients after takeover.</td></tr>
+    <tr><td>Reads on Standby</td><td>Read-only SQL directed to standby to offload primary.</td></tr>
+  </tbody>
+</table>
+<div class="callout green"><strong>Quick navigation</strong> Use the sidebar to browse all Db2 HADR topics — topologies, sync modes, network requirements, configuration, monitoring, and failover runbooks.</div>
+
+    </div>
+  </div>
+</div>
+<footer class="wiki-footer">Made with IBM Bob</footer>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/wiki.js"></script>
+</body>
+</html>
