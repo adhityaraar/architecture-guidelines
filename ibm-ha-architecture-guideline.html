@@ -811,271 +811,358 @@
   </div><!-- /tab-general -->
 
 
-  <!-- ══════════════════════════════════════════
-       TAB 2 — Db2 HADR
-  ══════════════════════════════════════════ -->
+  <!-- ════ TAB 2 — Db2 HADR ════ -->
   <div class="tab-panel" id="tab-db2">
 
     <nav class="toc">
       <h2>Contents</h2>
       <ol>
-        <li><a href="#d-overview">Overview</a></li>
-        <li><a href="#d-concepts">Core HADR Concepts</a></li>
-        <li><a href="#d-topology">Reference Topologies</a></li>
-        <li><a href="#d-sync">Synchronisation Modes</a></li>
-        <li><a href="#d-network">Network Requirements</a></li>
-        <li><a href="#d-storage">Storage Architecture</a></li>
-        <li><a href="#d-acr">Automatic Client Reroute (ACR)</a></li>
-        <li><a href="#d-config">Configuration Reference</a></li>
-        <li><a href="#d-monitoring">Monitoring &amp; Alerting</a></li>
-        <li><a href="#d-failover">Failover Procedures</a></li>
-        <li><a href="#d-checklist">Pre-Production Checklist</a></li>
+        <li><a href="#d-overview">1. Overview</a></li>
+        <li><a href="#d-topology">2. Reference Topologies</a></li>
+        <li><a href="#d-sync">3. Synchronisation Modes</a></li>
+        <li><a href="#d-network">4. Network &amp; Storage</a></li>
+        <li><a href="#d-config">5. Configuration Reference</a></li>
+        <li><a href="#d-acr">6. Client Reroute (ACR)</a></li>
+        <li><a href="#d-monitoring">7. Monitoring &amp; Alerting</a></li>
+        <li><a href="#d-failover">8. Failover Procedures</a></li>
+        <li><a href="#d-checklist">9. Pre-Production Checklist</a></li>
       </ol>
     </nav>
 
     <section id="d-overview">
-      <h2 class="section-title accent-db2">1. Overview</h2>
-      <p>IBM Db2 HADR replicates log records from a <strong>primary</strong> to one or more <strong>standby</strong> databases over TCP. The standby continuously replays logs; on primary failure it is promoted (takeover) to become the new primary.</p>
-      <table>
-        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
-        <tbody>
-          <tr><td>RPO (SYNC)</td><td>Zero</td></tr>
-          <tr><td>RPO (NEARSYNC)</td><td>&lt; 2 seconds</td></tr>
-          <tr><td>RTO (auto takeover)</td><td>&lt; 30 seconds</td></tr>
-          <tr><td>Availability</td><td>99.99%</td></tr>
-          <tr><td>Max standbys</td><td>3 (Db2 11.1+)</td></tr>
-        </tbody>
-      </table>
-    </section>
+<h3 class="sub-title">Db2 HADR — Overview</h3>
+<p style="color:#57606a;font-size:14px;">IBM Db2 High Availability Disaster Recovery (HADR)</p>
 
-    <section id="d-concepts">
-      <h2 class="section-title accent-db2">2. Core HADR Concepts</h2>
-      <table>
-        <thead><tr><th>Term</th><th>Definition</th></tr></thead>
-        <tbody>
-          <tr><td>Primary Database</td><td>Active instance accepting read/write workloads; ships logs to standby(s).</td></tr>
-          <tr><td>Standby Database</td><td>Continuously updated replica; can take over the primary role.</td></tr>
-          <tr><td>Log Shipping</td><td>Redo log records transmitted from primary to standby over TCP.</td></tr>
-          <tr><td>Takeover</td><td>Promotion of standby to primary — manual, by force, or automatic.</td></tr>
-          <tr><td>Log Gap</td><td>Difference between primary and standby LSN (log sequence number).</td></tr>
-          <tr><td>ACR</td><td>Automatic Client Reroute — redirects clients after takeover.</td></tr>
-          <tr><td>Reads on Standby</td><td>Read-only SQL directed to standby to offload primary.</td></tr>
-        </tbody>
-      </table>
+<p>IBM Db2 HADR replicates log records from a <strong>primary</strong> to one or more <strong>standby</strong> databases over TCP. The standby continuously replays logs; on primary failure it is promoted (takeover) to become the new primary.</p>
+<h3 class="sub-title">Goals &amp; Targets</h3>
+<table>
+  <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+  <tbody>
+    <tr><td>RPO (SYNC mode)</td><td><strong>Zero</strong></td></tr>
+    <tr><td>RPO (NEARSYNC mode)</td><td>&lt; 2 seconds</td></tr>
+    <tr><td>RTO (automatic takeover)</td><td>&lt; 30 seconds</td></tr>
+    <tr><td>Availability</td><td>99.99%</td></tr>
+    <tr><td>Maximum standbys</td><td>3 (Db2 11.1+)</td></tr>
+  </tbody>
+</table>
+<h3 class="sub-title">Core Concepts</h3>
+<table>
+  <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+  <tbody>
+    <tr><td>Primary Database</td><td>Active instance accepting read/write workloads; ships logs to standby(s).</td></tr>
+    <tr><td>Standby Database</td><td>Continuously updated replica; can take over the primary role.</td></tr>
+    <tr><td>Log Shipping</td><td>Redo log records transmitted from primary to standby over TCP.</td></tr>
+    <tr><td>Takeover</td><td>Promotion of standby to primary — manual, by force, or automatic.</td></tr>
+    <tr><td>Log Gap</td><td>Difference between primary and standby log sequence number (LSN).</td></tr>
+    <tr><td>ACR</td><td>Automatic Client Reroute — redirects clients after takeover.</td></tr>
+    <tr><td>Reads on Standby</td><td>Read-only SQL directed to standby to offload primary.</td></tr>
+  </tbody>
+</table>
+<div class="callout green"><strong>Quick navigation</strong> Use the sidebar to browse all Db2 HADR topics — topologies, sync modes, network requirements, configuration, monitoring, and failover runbooks.</div>
     </section>
 
     <section id="d-topology">
-      <h2 class="section-title accent-db2">3. Reference Topologies</h2>
-      <h3 class="sub-title">3.1 Single Standby — HA within DC</h3>
-      <div class="diagram-wrap">
-        <svg width="660" height="200" viewBox="0 0 660 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
-          <defs>
-            <marker id="da1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
-            <marker id="da2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c5cd8"/></marker>
-          </defs>
-          <rect x="10" y="70" width="120" height="60" rx="4" fill="#f7f8fa" stroke="#e5e7eb"/>
-          <text x="70" y="96" text-anchor="middle" font-weight="600">Application</text>
-          <text x="70" y="112" text-anchor="middle" fill="#57606a">Clients</text>
-          <rect x="190" y="70" width="120" height="60" rx="4" fill="#f0f5ff" stroke="#7c5cd8"/>
-          <text x="250" y="96" text-anchor="middle" font-weight="600" fill="#7c5cd8">ACR / VIP</text>
-          <text x="250" y="112" text-anchor="middle" fill="#57606a">HADR Listener</text>
-          <rect x="380" y="20" width="130" height="70" rx="4" fill="#1f2328"/>
-          <text x="445" y="50" text-anchor="middle" font-weight="600" fill="#ffffff">PRIMARY</text>
-          <text x="445" y="68" text-anchor="middle" fill="#e6edf3" font-size="11">Db2 (Active)</text>
-          <text x="445" y="83" text-anchor="middle" fill="#a78bfa" font-size="11">Site A</text>
-          <rect x="380" y="120" width="130" height="65" rx="4" fill="#f7f8fa" stroke="#e5e7eb"/>
-          <text x="445" y="150" text-anchor="middle" font-weight="600">STANDBY</text>
-          <text x="445" y="168" text-anchor="middle" fill="#57606a" font-size="11">Db2 (Passive)</text>
-          <text x="445" y="181" text-anchor="middle" fill="#57606a" font-size="11">Site A</text>
-          <line x1="130" y1="100" x2="188" y2="100" stroke="#57606a" stroke-width="1.5" marker-end="url(#da1)"/>
-          <line x1="310" y1="88" x2="378" y2="58" stroke="#57606a" stroke-width="1.5" marker-end="url(#da1)"/>
-          <line x1="310" y1="112" x2="378" y2="145" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#da1)"/>
-          <line x1="445" y1="90" x2="445" y2="118" stroke="#7c5cd8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#da2)"/>
-          <text x="452" y="108" fill="#7c5cd8" font-size="11">Log Ship</text>
-        </svg>
-      </div>
+<h3 class="sub-title">Reference Topologies</h3>
+<p style="color:#57606a;font-size:14px;">Choose the right topology based on DC count, RPO, and RTO requirements.</p>
 
-      <h3 class="sub-title">3.2 Cross-Site HA + DR (Recommended for Tier 1)</h3>
-      <div class="diagram-wrap">
-        <svg width="660" height="230" viewBox="0 0 660 230" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
-          <defs>
-            <marker id="db1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c5cd8"/></marker>
-            <marker id="db2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
-          </defs>
-          <rect x="10" y="10" width="280" height="200" rx="6" fill="none" stroke="#7c5cd8" stroke-dasharray="6,3"/>
-          <text x="150" y="28" text-anchor="middle" fill="#7c5cd8" font-weight="600" font-size="11">SITE A — Primary DC</text>
-          <rect x="370" y="10" width="280" height="200" rx="6" fill="none" stroke="#57606a" stroke-dasharray="6,3"/>
-          <text x="510" y="28" text-anchor="middle" fill="#57606a" font-weight="600" font-size="11">SITE B — DR DC</text>
-          <rect x="55" y="55" width="140" height="70" rx="4" fill="#1f2328"/>
-          <text x="125" y="85" text-anchor="middle" font-weight="600" fill="#ffffff">PRIMARY</text>
-          <text x="125" y="103" text-anchor="middle" fill="#e6edf3" font-size="11">SYNC / NEARSYNC</text>
-          <text x="125" y="118" text-anchor="middle" fill="#a78bfa" font-size="11">Db2 11.5</text>
-          <rect x="55" y="150" width="140" height="45" rx="4" fill="#f7f8fa" stroke="#e5e7eb"/>
-          <text x="125" y="171" text-anchor="middle" font-weight="600">STANDBY 1</text>
-          <text x="125" y="187" text-anchor="middle" fill="#57606a" font-size="11">Principal (same DC)</text>
-          <rect x="415" y="75" width="180" height="80" rx="4" fill="#faf5ff" stroke="#7c5cd8"/>
-          <text x="505" y="106" text-anchor="middle" font-weight="600" fill="#7c5cd8">STANDBY 2</text>
-          <text x="505" y="124" text-anchor="middle" fill="#57606a" font-size="11">ASYNC — Remote DR</text>
-          <text x="505" y="139" text-anchor="middle" fill="#57606a" font-size="11">Db2 11.5</text>
-          <line x1="125" y1="125" x2="125" y2="148" stroke="#7c5cd8" stroke-width="1.5" marker-end="url(#db1)"/>
-          <text x="131" y="141" fill="#7c5cd8" font-size="10">SYNC</text>
-          <line x1="195" y1="93" x2="413" y2="113" stroke="#57606a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#db2)"/>
-          <text x="295" y="88" fill="#57606a" font-size="10">ASYNC (WAN)</text>
-        </svg>
-      </div>
-
-      <h3 class="sub-title">3.3 Topology Decision Matrix</h3>
-      <table>
-        <thead><tr><th>Scenario</th><th>Topology</th><th>Sync Mode</th><th>Standbys</th></tr></thead>
-        <tbody>
-          <tr><td>Single DC, host-level HA</td><td>3.1 Single Standby</td><td>SYNC or NEARSYNC</td><td>1</td></tr>
-          <tr><td>Two DC, full HA + DR</td><td>3.2 Cross-Site</td><td>SYNC (local) + ASYNC (remote)</td><td>2</td></tr>
-          <tr><td>Three DC, max resilience</td><td>Extended cross-site</td><td>SYNC + NEARSYNC + ASYNC</td><td>3</td></tr>
-          <tr><td>Read offload required</td><td>Any + Reads on Standby</td><td>Any</td><td>1–3</td></tr>
-        </tbody>
-      </table>
+<h3 class="sub-title">3.1 Single Standby — HA Within DC</h3>
+<div class="diagram-wrap">
+  <svg width="620" height="200" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+    <defs>
+      <marker id="da1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
+      <marker id="da2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c5cd8"/></marker>
+    </defs>
+    <rect x="10" y="70" width="120" height="60" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="70" y="96" text-anchor="middle" font-weight="600">Application</text>
+    <text x="70" y="112" text-anchor="middle" fill="#57606a">Clients</text>
+    <rect x="190" y="70" width="120" height="60" rx="4" fill="#f0f5ff" stroke="#7c5cd8"/>
+    <text x="250" y="96" text-anchor="middle" font-weight="600" fill="#7c5cd8">ACR / VIP</text>
+    <text x="250" y="112" text-anchor="middle" fill="#57606a">HADR Listener</text>
+    <rect x="370" y="20" width="130" height="70" rx="4" fill="#1f2328"/>
+    <text x="435" y="50" text-anchor="middle" font-weight="600" fill="#fff">PRIMARY</text>
+    <text x="435" y="68" text-anchor="middle" fill="#e6edf3" font-size="11">Db2 (Active)</text>
+    <text x="435" y="83" text-anchor="middle" fill="#a78bfa" font-size="11">Site A</text>
+    <rect x="370" y="120" width="130" height="65" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="435" y="150" text-anchor="middle" font-weight="600">STANDBY</text>
+    <text x="435" y="168" text-anchor="middle" fill="#57606a" font-size="11">Db2 (Passive)</text>
+    <text x="435" y="181" text-anchor="middle" fill="#57606a" font-size="11">Site A</text>
+    <line x1="130" y1="100" x2="188" y2="100" stroke="#57606a" stroke-width="1.5" marker-end="url(#da1)"/>
+    <line x1="310" y1="88" x2="368" y2="58" stroke="#57606a" stroke-width="1.5" marker-end="url(#da1)"/>
+    <line x1="310" y1="112" x2="368" y2="145" stroke="#57606a" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#da1)"/>
+    <line x1="435" y1="90" x2="435" y2="118" stroke="#7c5cd8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#da2)"/>
+    <text x="442" y="108" fill="#7c5cd8" font-size="11">Log Ship</text>
+  </svg>
+</div>
+<h3 class="sub-title">3.2 Cross-Site HA + DR (Recommended for Tier 1)</h3>
+<div class="diagram-wrap">
+  <svg width="620" height="230" viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+    <defs>
+      <marker id="db1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7c5cd8"/></marker>
+      <marker id="db2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
+    </defs>
+    <rect x="10" y="10" width="270" height="200" rx="6" fill="none" stroke="#7c5cd8" stroke-dasharray="6,3"/>
+    <text x="145" y="28" text-anchor="middle" fill="#7c5cd8" font-weight="600" font-size="11">SITE A — Primary DC</text>
+    <rect x="340" y="10" width="270" height="200" rx="6" fill="none" stroke="#57606a" stroke-dasharray="6,3"/>
+    <text x="475" y="28" text-anchor="middle" fill="#57606a" font-weight="600" font-size="11">SITE B — DR DC</text>
+    <rect x="50" y="55" width="140" height="70" rx="4" fill="#1f2328"/>
+    <text x="120" y="85" text-anchor="middle" font-weight="600" fill="#fff">PRIMARY</text>
+    <text x="120" y="103" text-anchor="middle" fill="#e6edf3" font-size="11">SYNC / NEARSYNC</text>
+    <text x="120" y="118" text-anchor="middle" fill="#a78bfa" font-size="11">Db2 11.5</text>
+    <rect x="50" y="148" width="140" height="45" rx="4" fill="#f7f8fa" stroke="#dee2e6"/>
+    <text x="120" y="171" text-anchor="middle" font-weight="600">STANDBY 1</text>
+    <text x="120" y="187" text-anchor="middle" fill="#57606a" font-size="11">Principal (same DC)</text>
+    <rect x="380" y="75" width="180" height="80" rx="4" fill="#faf5ff" stroke="#7c5cd8"/>
+    <text x="470" y="106" text-anchor="middle" font-weight="600" fill="#7c5cd8">STANDBY 2</text>
+    <text x="470" y="124" text-anchor="middle" fill="#57606a" font-size="11">ASYNC — Remote DR</text>
+    <text x="470" y="139" text-anchor="middle" fill="#57606a" font-size="11">Db2 11.5</text>
+    <line x1="120" y1="125" x2="120" y2="146" stroke="#7c5cd8" stroke-width="1.5" marker-end="url(#db1)"/>
+    <text x="126" y="139" fill="#7c5cd8" font-size="10">SYNC</text>
+    <line x1="190" y1="93" x2="378" y2="113" stroke="#57606a" stroke-width="1.5" stroke-dasharray="5,3" marker-end="url(#db2)"/>
+    <text x="280" y="88" text-anchor="middle" fill="#57606a" font-size="10">ASYNC (WAN)</text>
+  </svg>
+</div>
+<h3 class="sub-title">Topology Decision Matrix</h3>
+<table>
+  <thead><tr><th>Scenario</th><th>Topology</th><th>Sync Mode</th><th>Standbys</th></tr></thead>
+  <tbody>
+    <tr><td>Single DC, host-level HA</td><td>Single Standby</td><td>SYNC or NEARSYNC</td><td>1</td></tr>
+    <tr><td>Two DC, full HA + DR</td><td>Cross-Site</td><td>SYNC (local) + ASYNC (remote)</td><td>2</td></tr>
+    <tr><td>Three DC, max resilience</td><td>Extended cross-site</td><td>SYNC + NEARSYNC + ASYNC</td><td>3</td></tr>
+    <tr><td>Read offload required</td><td>Any + Reads on Standby</td><td>Any</td><td>1–3</td></tr>
+  </tbody>
+</table>
     </section>
 
     <section id="d-sync">
-      <h2 class="section-title accent-db2">4. Synchronisation Modes</h2>
-      <table>
-        <thead><tr><th>Mode</th><th>Commit Ack</th><th>RPO</th><th>Perf Impact</th><th>Use When</th></tr></thead>
-        <tbody>
-          <tr><td><strong>SYNC</strong></td><td>Log flushed to standby disk</td><td>Zero</td><td>High (RTT)</td><td>Tier 1 — zero data loss mandatory</td></tr>
-          <tr><td><strong>NEARSYNC</strong></td><td>Log received by standby</td><td>~1 page</td><td>Medium</td><td>Low-latency LAN, sub-second acceptable</td></tr>
-          <tr><td><strong>ASYNC</strong></td><td>Log on primary disk only</td><td>Seconds–min</td><td>Minimal</td><td>WAN DR replication</td></tr>
-          <tr><td><strong>SUPERASYNC</strong></td><td>Immediate (no standby ack)</td><td>Unbounded</td><td>None</td><td>Monitoring replicas — NOT for production HA</td></tr>
-        </tbody>
-      </table>
-      <div class="callout warn">
-        <strong>SYNC over WAN</strong>
-        SYNC adds one round trip per commit. For sites &gt; 5 ms RTT apart, use NEARSYNC or ASYNC. Reserve SYNC for same-DC, dedicated low-latency links.
-      </div>
+<h3 class="sub-title">Synchronisation Modes</h3>
+<p style="color:#57606a;font-size:14px;">Choose the right sync mode based on RPO requirements and network latency.</p>
+
+<table>
+  <thead><tr><th>Mode</th><th>Commit Acknowledgement</th><th>RPO</th><th>Perf Impact</th><th>Use When</th></tr></thead>
+  <tbody>
+    <tr><td><strong>SYNC</strong></td><td>Log flushed to standby disk</td><td>Zero</td><td>High (RTT)</td><td>Tier 1 — zero data loss mandatory</td></tr>
+    <tr><td><strong>NEARSYNC</strong></td><td>Log received by standby</td><td>~1 page</td><td>Medium</td><td>Low-latency LAN, sub-second RPO acceptable</td></tr>
+    <tr><td><strong>ASYNC</strong></td><td>Log on primary disk only</td><td>Seconds–min</td><td>Minimal</td><td>WAN DR replication</td></tr>
+    <tr><td><strong>SUPERASYNC</strong></td><td>Immediate (no standby ack)</td><td>Unbounded</td><td>None</td><td>Monitoring replicas only — NOT for production HA</td></tr>
+  </tbody>
+</table>
+<div class="callout warn">
+  <strong>SYNC over WAN</strong>
+  SYNC adds one round trip per commit. For sites &gt; 5 ms RTT apart, use NEARSYNC or ASYNC. Reserve SYNC for same-DC, dedicated low-latency links.
+</div>
+<h3 class="sub-title">Changing Sync Mode (no restart required)</h3>
+<pre><code>UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_SYNCMODE NEARSYNC
+-- Change takes effect immediately; verify with MON_GET_HADR</code></pre>
+<h3 class="sub-title">Peer Window</h3>
+<p>The <code>HADR_PEER_WINDOW</code> parameter defines how long the primary waits for the standby to acknowledge logs before downgrading to ASYNC mode.</p>
+<pre><code>UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_PEER_WINDOW 120  -- seconds
+-- A value of 0 disables the peer window (not recommended for Tier 1)</code></pre>
     </section>
 
     <section id="d-network">
-      <h2 class="section-title accent-db2">5. Network Requirements</h2>
-      <div class="callout">
-        <strong>Dedicated HADR Interface Required</strong>
-        Always use a separate NIC for HADR log shipping — isolated from the client-facing interface.
-      </div>
-      <table>
-        <thead><tr><th>Parameter</th><th>Requirement</th><th>Notes</th></tr></thead>
-        <tbody>
-          <tr><td>HADR_LOCAL_HOST</td><td>Dedicated replication IP</td><td>Never 0.0.0.0</td></tr>
-          <tr><td>HADR_LOCAL_SVC / HADR_REMOTE_SVC</td><td>Dedicated TCP port (e.g. 51000)</td><td>Must match on both ends</td></tr>
-          <tr><td>Bandwidth (SYNC)</td><td>≥ peak log rate × 1.5</td><td>Provision for burst</td></tr>
-          <tr><td>Bandwidth (ASYNC WAN)</td><td>≥ avg log rate × 1.2</td><td>—</td></tr>
-          <tr><td>Latency (SYNC)</td><td>&lt; 5 ms RTT</td><td>Same DC or dedicated interconnect</td></tr>
-          <tr><td>Latency (ASYNC)</td><td>&lt; 100 ms</td><td>Higher latency = larger log gap</td></tr>
-        </tbody>
-      </table>
-    </section>
+<h3 class="sub-title">Network &amp; Storage</h3>
 
-    <section id="d-storage">
-      <h2 class="section-title accent-db2">6. Storage Architecture</h2>
-      <div class="callout warn">
-        <strong>No Shared Storage</strong>
-        Do NOT share storage between primary and standby. HADR is log-based; shared disks create a SPoF.
-      </div>
-      <table>
-        <thead><tr><th>Component</th><th>Requirement</th><th>Rationale</th></tr></thead>
-        <tbody>
-          <tr><td>Database files</td><td>Independent per node</td><td>No shared-disk dependency</td></tr>
-          <tr><td>Archive log path</td><td>Same logical path on both nodes</td><td>Required for log-gap catchup</td></tr>
-          <tr><td>Active log path</td><td>Fast storage (NVMe/SSD)</td><td>Directly affects SYNC commit latency</td></tr>
-          <tr><td>Standby layout</td><td>Identical tablespace layout to primary</td><td>Restore of primary backup initialises standby</td></tr>
-        </tbody>
-      </table>
-      <pre><code>-- Size active logs: measure peak usage first
+<div class="callout">
+  <strong>Dedicated HADR Interface Required</strong>
+  Always use a separate NIC for HADR log shipping — isolated from the client-facing interface. Never bind to 0.0.0.0.
+</div>
+<h3 class="sub-title">Network Requirements</h3>
+<table>
+  <thead><tr><th>Parameter</th><th>Requirement</th><th>Notes</th></tr></thead>
+  <tbody>
+    <tr><td>HADR_LOCAL_HOST</td><td>Dedicated replication IP</td><td>Never 0.0.0.0</td></tr>
+    <tr><td>HADR_LOCAL_SVC / HADR_REMOTE_SVC</td><td>Dedicated TCP port (e.g. 51000)</td><td>Must match on both ends</td></tr>
+    <tr><td>Bandwidth (SYNC)</td><td>&ge; peak log rate &times; 1.5</td><td>Provision for burst</td></tr>
+    <tr><td>Bandwidth (ASYNC WAN)</td><td>&ge; avg log rate &times; 1.2</td><td>&mdash;</td></tr>
+    <tr><td>Latency (SYNC)</td><td>&lt; 5 ms RTT</td><td>Same DC or dedicated interconnect</td></tr>
+    <tr><td>Latency (ASYNC)</td><td>&lt; 100 ms</td><td>Higher latency = larger log gap</td></tr>
+  </tbody>
+</table>
+<h3 class="sub-title">Storage Requirements</h3>
+<div class="callout warn">
+  <strong>No Shared Storage</strong>
+  Do NOT share storage between primary and standby. HADR is log-based; shared disks create a single point of failure.
+</div>
+<table>
+  <thead><tr><th>Component</th><th>Requirement</th><th>Rationale</th></tr></thead>
+  <tbody>
+    <tr><td>Database files</td><td>Independent per node</td><td>No shared-disk dependency</td></tr>
+    <tr><td>Archive log path</td><td>Same logical path on both nodes</td><td>Required for log-gap catchup</td></tr>
+    <tr><td>Active log path</td><td>Fast storage (NVMe/SSD)</td><td>Directly affects SYNC commit latency</td></tr>
+    <tr><td>Standby layout</td><td>Identical tablespace layout to primary</td><td>Restore of primary backup initialises standby</td></tr>
+  </tbody>
+</table>
+<pre><code>-- Size active logs: measure peak usage first
 db2 "SELECT TOTAL_LOG_USED_KB, TOTAL_LOG_AVAILABLE_KB
      FROM TABLE(MON_GET_DATABASE(-2)) AS T"
 -- Rule: LOGFILSIZ x LOGPRIMARY >= 1 hour of peak log generation</code></pre>
     </section>
 
-    <section id="d-acr">
-      <h2 class="section-title accent-db2">7. Automatic Client Reroute (ACR)</h2>
-      <pre><code>-- Define standby as alternate server
-UPDATE ALTERNATE SERVER FOR DATABASE &lt;DBNAME&gt;
-  USING HOSTNAME &lt;standby_hostname&gt; PORT &lt;port&gt;</code></pre>
-      <table>
-        <thead><tr><th>Client State</th><th>ACR Behaviour</th></tr></thead>
-        <tbody>
-          <tr><td>Idle connection</td><td>Auto-retried to alternate server</td></tr>
-          <tr><td>Active transaction</td><td>Rolled back; retried to new primary</td></tr>
-          <tr><td>No ACR configured</td><td>SQL30081N — manual reconnect required</td></tr>
-        </tbody>
-      </table>
-    </section>
-
     <section id="d-config">
-      <h2 class="section-title accent-db2">8. Configuration Reference</h2>
-      <pre><code>-- Core HADR parameters
+<h3 class="sub-title">Configuration Reference</h3>
+<p style="color:#57606a;font-size:14px;">Complete parameter reference for setting up Db2 HADR from scratch.</p>
+
+<h3 class="sub-title">Step 1 — Prepare Both Nodes</h3>
+<pre><code>-- Take a full offline or online backup of the primary
+db2 BACKUP DATABASE &lt;DBNAME&gt; ONLINE TO /backup/ INCLUDE LOGS
+
+-- Restore onto standby (different hostname)
+db2 RESTORE DATABASE &lt;DBNAME&gt; FROM /backup/ LOGTARGET /db2logs/
+db2 ROLLFORWARD DATABASE &lt;DBNAME&gt; TO END OF LOGS AND STOP</code></pre>
+<h3 class="sub-title">Step 2 — Set HADR Parameters</h3>
+<pre><code>-- On PRIMARY
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_LOCAL_HOST  '&lt;hadr_ip_primary&gt;'
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_LOCAL_SVC   '51000'
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_REMOTE_HOST '&lt;hadr_ip_standby&gt;'
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_REMOTE_SVC  '51000'
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_REMOTE_INST '&lt;standby_instance&gt;'
-UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_SYNCMODE    SYNC   -- or NEARSYNC/ASYNC
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_SYNCMODE    SYNC
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_TIMEOUT     120
-UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_PEER_WINDOW  120
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_PEER_WINDOW 120
 UPDATE DB CFG FOR &lt;DBNAME&gt; USING LOGARCHMETH1 'DISK:/db2archive/&lt;DBNAME&gt;/'
-db2set DB2_HADR_ROS=YES   -- Reads on Standby
+db2set DB2_HADR_ROS=YES   -- Reads on Standby (optional)</code></pre>
+<pre><code>-- On STANDBY (LOCAL/REMOTE swapped)
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_LOCAL_HOST  '&lt;hadr_ip_standby&gt;'
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_LOCAL_SVC   '51000'
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_REMOTE_HOST '&lt;hadr_ip_primary&gt;'
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_REMOTE_SVC  '51000'
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_REMOTE_INST '&lt;primary_instance&gt;'
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_SYNCMODE    SYNC
+UPDATE DB CFG FOR &lt;DBNAME&gt; USING HADR_TIMEOUT     120</code></pre>
+<h3 class="sub-title">Step 3 — Start HADR (standby first)</h3>
+<pre><code>START HADR ON DATABASE &lt;DBNAME&gt; AS STANDBY   -- on standby node
+START HADR ON DATABASE &lt;DBNAME&gt; AS PRIMARY   -- on primary node</code></pre>
+<h3 class="sub-title">Step 4 — Verify</h3>
+<pre><code>SELECT HADR_ROLE, HADR_STATE, HADR_SYNCMODE, STANDBY_LOG_GAP
+FROM TABLE(MON_GET_HADR(NULL)) AS T;
+-- Expected: HADR_STATE = PEER, STANDBY_LOG_GAP = 0 (SYNC)</code></pre>
+<div class="callout green"><strong>HADR_STATE = PEER</strong> means both nodes are fully synchronised and HADR is operating normally.</div>
+    </section>
 
--- Start HADR (standby first, then primary)
-START HADR ON DATABASE &lt;DBNAME&gt; AS STANDBY
-START HADR ON DATABASE &lt;DBNAME&gt; AS PRIMARY</code></pre>
+    <section id="d-acr">
+<h3 class="sub-title">Automatic Client Reroute (ACR)</h3>
+<p style="color:#57606a;font-size:14px;">Redirect application connections automatically after a HADR takeover.</p>
+
+<p>ACR allows the Db2 client driver to reconnect to the new primary after takeover without application changes.</p>
+<h3 class="sub-title">Configure Alternate Server</h3>
+<pre><code>-- Run on each client node
+UPDATE ALTERNATE SERVER FOR DATABASE &lt;DBNAME&gt;
+  USING HOSTNAME &lt;standby_hostname&gt; PORT &lt;port&gt;
+
+LIST DATABASE DIRECTORY  -- verify</code></pre>
+<h3 class="sub-title">ACR Behaviour by Client State</h3>
+<table>
+  <thead><tr><th>Client State at Failover</th><th>ACR Behaviour</th></tr></thead>
+  <tbody>
+    <tr><td>Idle connection (no active transaction)</td><td>Automatically retried to alternate server — transparent to application</td></tr>
+    <tr><td>Active transaction in progress</td><td>Transaction rolled back; connection retried to new primary</td></tr>
+    <tr><td>No ACR configured</td><td>SQL30081N — manual reconnect required</td></tr>
+  </tbody>
+</table>
+<div class="callout warn">
+  <strong>ACR &ne; Zero-Downtime</strong>
+  ACR eliminates manual reconnection but active transactions are still rolled back. Design applications to retry on connection failure.
+</div>
+<h3 class="sub-title">JDBC Connection String</h3>
+<pre><code>jdbc:db2://&lt;primary_host&gt;:50000/&lt;DBNAME&gt;:
+  clientRerouteAlternateServerName=&lt;standby_host&gt;;
+  clientRerouteAlternatePortNumber=50000;
+  enableClientAffinitiesList=0;</code></pre>
     </section>
 
     <section id="d-monitoring">
-      <h2 class="section-title accent-db2">9. Monitoring &amp; Alerting</h2>
-      <pre><code>SELECT HADR_ROLE, HADR_STATE, HADR_SYNCMODE, HADR_CONNECT_STATUS,
+<h3 class="sub-title">Monitoring &amp; Alerting</h3>
+
+<h3 class="sub-title">Core Monitoring Query</h3>
+<pre><code>SELECT HADR_ROLE, HADR_STATE, HADR_SYNCMODE, HADR_CONNECT_STATUS,
        STANDBY_LOG_GAP, STANDBY_REPLAY_DELAY,
-       PRIMARY_LOG_TIME, STANDBY_LOG_TIME
+       PRIMARY_LOG_TIME, STANDBY_LOG_TIME,
+       HADR_HEARTBEAT
 FROM TABLE(MON_GET_HADR(NULL)) AS T;</code></pre>
-      <table>
-        <thead><tr><th>Metric</th><th>Alert Threshold</th></tr></thead>
-        <tbody>
-          <tr><td>HADR_STATE</td><td>Alert if ≠ PEER</td></tr>
-          <tr><td>STANDBY_LOG_GAP</td><td>&gt; 1000 pages</td></tr>
-          <tr><td>STANDBY_REPLAY_DELAY</td><td>&gt; 10 seconds (SYNC)</td></tr>
-          <tr><td>HADR_CONNECT_STATUS</td><td>Alert if DISCONNECTED</td></tr>
-        </tbody>
-      </table>
+<h3 class="sub-title">Alert Thresholds</h3>
+<table>
+  <thead><tr><th>Metric</th><th>Normal</th><th>Alert Threshold</th><th>Action</th></tr></thead>
+  <tbody>
+    <tr><td>HADR_STATE</td><td>PEER</td><td>Any state &ne; PEER</td><td>Investigate immediately; check network</td></tr>
+    <tr><td>HADR_CONNECT_STATUS</td><td>CONNECTED</td><td>DISCONNECTED</td><td>Check network; restart HADR if needed</td></tr>
+    <tr><td>STANDBY_LOG_GAP</td><td>0 (SYNC)</td><td>&gt; 1000 pages</td><td>Check bandwidth</td></tr>
+    <tr><td>STANDBY_REPLAY_DELAY</td><td>0 s</td><td>&gt; 10 s (SYNC)</td><td>Standby under load; investigate I/O</td></tr>
+    <tr><td>HADR_HEARTBEAT</td><td>Recent</td><td>No update &gt; 30 s</td><td>Network issue; check HADR port</td></tr>
+  </tbody>
+</table>
+<h3 class="sub-title">HADR States Reference</h3>
+<table>
+  <thead><tr><th>State</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>PEER</code></td><td>Normal operation — fully synchronised</td></tr>
+    <tr><td><code>DISCONNECTED</code></td><td>No TCP connection between primary and standby</td></tr>
+    <tr><td><code>REMOTE_CATCHUP</code></td><td>Standby reconnected and catching up with log gap</td></tr>
+    <tr><td><code>LOCAL_CATCHUP</code></td><td>New primary catching up after takeover</td></tr>
+  </tbody>
+</table>
+<h3 class="sub-title">Shell Check Script</h3>
+<pre><code>#!/bin/bash
+STATE=$(db2 -x "SELECT HADR_STATE FROM TABLE(MON_GET_HADR(NULL)) AS T" | tr -d ' ')
+if [ "$STATE" != "PEER" ]; then
+  echo "CRITICAL: HADR_STATE=$STATE"; exit 2
+fi
+echo "OK: HADR_STATE=PEER"; exit 0</code></pre>
     </section>
 
     <section id="d-failover">
-      <h2 class="section-title accent-db2">10. Failover Procedures</h2>
-      <pre><code>-- Graceful takeover (standby must be in PEER state)
+<h3 class="sub-title">Failover Procedures</h3>
+
+<div class="callout warn"><strong>Before any takeover</strong> — confirm HADR_STATE and log gap with MON_GET_HADR. Document the reason for takeover.</div>
+<h3 class="sub-title">Graceful Takeover (Planned Maintenance)</h3>
+<p>Use when primary is reachable and standby is in PEER state. No data loss.</p>
+<pre><code>SELECT HADR_STATE, STANDBY_LOG_GAP FROM TABLE(MON_GET_HADR(NULL)) AS T;
 TAKEOVER HADR ON DATABASE &lt;DBNAME&gt;
-
--- Forced takeover (primary unreachable — DATA LOSS POSSIBLE)
-TAKEOVER HADR ON DATABASE &lt;DBNAME&gt; BY FORCE
-
--- Re-integrate old primary as new standby
-START HADR ON DATABASE &lt;DBNAME&gt; AS STANDBY</code></pre>
-      <div class="callout danger">
-        <strong>TAKEOVER BY FORCE — Risk</strong>
-        Data loss equal to current log gap is possible. Isolate the old primary from clients first to prevent split-brain.
-      </div>
+SELECT HADR_ROLE, HADR_STATE FROM TABLE(MON_GET_HADR(NULL)) AS T;</code></pre>
+<h3 class="sub-title">Forced Takeover (Emergency — Primary Unreachable)</h3>
+<div class="callout danger">
+  <strong>DATA LOSS POSSIBLE</strong>
+  Data loss equal to the current log gap will occur. Isolate the old primary from the network before executing to prevent split-brain.
+</div>
+<pre><code>-- Isolate old primary (fence from network first!)
+TAKEOVER HADR ON DATABASE &lt;DBNAME&gt; BY FORCE</code></pre>
+<h3 class="sub-title">Re-integrate Old Primary as New Standby</h3>
+<pre><code>db2stop force                                    -- on old primary
+START HADR ON DATABASE &lt;DBNAME&gt; AS STANDBY      -- restart as standby
+SELECT HADR_STATE, STANDBY_LOG_GAP FROM TABLE(MON_GET_HADR(NULL)) AS T;
+-- Wait for REMOTE_CATCHUP -> PEER</code></pre>
+<h3 class="sub-title">Failover Decision Tree</h3>
+<table>
+  <thead><tr><th>Situation</th><th>Action</th><th>Risk</th></tr></thead>
+  <tbody>
+    <tr><td>Planned maintenance</td><td>Graceful TAKEOVER HADR</td><td>None</td></tr>
+    <tr><td>Primary unreachable, standby PEER</td><td>Confirm isolation, then TAKEOVER BY FORCE</td><td>Possible log gap loss</td></tr>
+    <tr><td>Primary unreachable, standby DISCONNECTED</td><td>Restore standby from backup first, then catch up</td><td>Higher data loss risk</td></tr>
+    <tr><td>Both nodes unreachable</td><td>Restore from latest backup to new node</td><td>Data loss up to last backup</td></tr>
+  </tbody>
+</table>
     </section>
 
     <section id="d-checklist">
-      <h2 class="section-title accent-db2">11. Db2 HADR Pre-Production Checklist</h2>
-      <ul class="checklist">
-        <li><span class="tick"></span>Topology selected; sync mode matches tier RPO</li>
-        <li><span class="tick"></span>Dedicated HADR NIC configured on both nodes</li>
-        <li><span class="tick"></span>No shared storage between primary and standby</li>
-        <li><span class="tick"></span>Active log sized ≥ 1 hour of peak log generation</li>
-        <li><span class="tick"></span>Log archive path configured and tested</li>
-        <li><span class="tick"></span>ACR alternate server configured on all client nodes</li>
-        <li><span class="tick"></span>Automation layer (TSA / PowerHA / Pacemaker) configured</li>
-        <li><span class="tick"></span>HADR link encrypted (TLS 1.2+ mandatory for WAN)</li>
-        <li><span class="tick"></span>HADR_STATE confirmed PEER under load</li>
-        <li><span class="tick"></span>Graceful and forced takeover tested; RTO measured</li>
-        <li><span class="tick"></span>Old-primary re-integration procedure tested</li>
-        <li><span class="tick"></span>Db2 Audit enabled; logs retained ≥ 90 days</li>
-      </ul>
+<h3 class="sub-title">Db2 HADR Pre-Production Checklist</h3>
+
+<ul class="checklist">
+  <li><span class="tick"></span>Topology selected and sync mode confirmed against tier RPO target</li>
+  <li><span class="tick"></span>Dedicated HADR NIC configured on both primary and standby nodes</li>
+  <li><span class="tick"></span>No shared storage between primary and standby confirmed</li>
+  <li><span class="tick"></span>Active log sized to cover &ge; 1 hour of peak log generation</li>
+  <li><span class="tick"></span>Log archive path configured, tested, and verified on both nodes</li>
+  <li><span class="tick"></span>HADR parameters set correctly on both nodes (LOCAL/REMOTE swapped)</li>
+  <li><span class="tick"></span>HADR started and HADR_STATE = PEER confirmed under load</li>
+  <li><span class="tick"></span>ACR alternate server configured on all client nodes</li>
+  <li><span class="tick"></span>Automation layer (TSA / PowerHA / Pacemaker) configured and tested</li>
+  <li><span class="tick"></span>HADR link encrypted with TLS 1.2+ (mandatory for WAN links)</li>
+  <li><span class="tick"></span>Reads on Standby tested if enabled</li>
+  <li><span class="tick"></span>Graceful takeover tested and RTO measured against target</li>
+  <li><span class="tick"></span>Forced takeover tested and old-primary re-integration verified</li>
+  <li><span class="tick"></span>Monitoring alerts configured and tested end-to-end</li>
+  <li><span class="tick"></span>Db2 Audit enabled with logs retained &ge; 90 days</li>
+  <li><span class="tick"></span>Runbook reviewed and stored in accessible location</li>
+</ul>
     </section>
 
   </div><!-- /tab-db2 -->
