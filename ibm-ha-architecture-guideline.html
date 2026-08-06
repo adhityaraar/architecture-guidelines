@@ -78,9 +78,21 @@
       transition: color .15s, border-color .15s;
     }
     .tab-btn:hover { color: #1f2328; }
-    .tab-btn.active { color: #3b82d4; border-bottom-color: #3b82d4; }
-    .tab-btn.tab-db2.active   { color: #7c5cd8; border-bottom-color: #7c5cd8; }
-    .tab-btn.tab-ds.active    { color: #0f7b5e; border-bottom-color: #0f7b5e; }
+    .tab-btn.active              { color: #3b82d4; border-bottom-color: #3b82d4; }
+    .tab-btn.tab-db2.active      { color: #7c5cd8; border-bottom-color: #7c5cd8; }
+    .tab-btn.tab-ds.active       { color: #0f7b5e; border-bottom-color: #0f7b5e; }
+    .tab-btn.tab-cdc.active      { color: #b45309; border-bottom-color: #b45309; }
+    .tab-btn.tab-wxdi.active     { color: #0550ae; border-bottom-color: #0550ae; }
+    .tab-btn.tab-wxdint.active   { color: #1d4ed8; border-bottom-color: #1d4ed8; }
+    .tab-btn.tab-gdp.active      { color: #b91c1c; border-bottom-color: #b91c1c; }
+    .tab-btn.tab-gdc.active      { color: #be185d; border-bottom-color: #be185d; }
+    .tab-btn.tab-gcm.active      { color: #6d28d9; border-bottom-color: #6d28d9; }
+    .accent-cdc    { color: #b45309; }
+    .accent-wxdi   { color: #0550ae; }
+    .accent-wxdint { color: #1d4ed8; }
+    .accent-gdp    { color: #b91c1c; }
+    .accent-gdc    { color: #be185d; }
+    .accent-gcm    { color: #6d28d9; }
 
     /* ── Tab panels ── */
     .tab-panel { display: none; }
@@ -211,15 +223,21 @@
     <div class="meta-row">
       <span><strong>Version:</strong> 1.0</span>
       <span><strong>Audience:</strong> Architects, DBAs, Platform Engineers</span>
-      <span><strong>Products:</strong> Db2, DataStage — and general HA principles</span>
+      <span><strong>Products:</strong> Db2, InfoSphere DataStage, InfoSphere CDC, watsonx.data, Guardium</span>
     </div>
   </header>
 
   <!-- ── Tab bar ── -->
-  <div class="tab-bar">
+  <div class="tab-bar" style="flex-wrap:wrap;">
     <button class="tab-btn tab-general active" data-tab="general">General</button>
-    <button class="tab-btn tab-db2"     data-tab="db2">Db2 HADR</button>
-    <button class="tab-btn tab-ds"      data-tab="datastage">DataStage HA</button>
+    <button class="tab-btn tab-db2"     data-tab="db2">Db2</button>
+    <button class="tab-btn tab-ds"      data-tab="datastage">InfoSphere DataStage</button>
+    <button class="tab-btn tab-cdc"     data-tab="cdc">InfoSphere CDC</button>
+    <button class="tab-btn tab-wxdi"    data-tab="wxdi">watsonx.data Integration</button>
+    <button class="tab-btn tab-wxdint"  data-tab="wxdint">watsonx.data Intelligence</button>
+    <button class="tab-btn tab-gdp"     data-tab="gdp">Guardium Data Protection</button>
+    <button class="tab-btn tab-gdc"     data-tab="gdc">Guardium Discover &amp; Classify</button>
+    <button class="tab-btn tab-gcm"     data-tab="gcm">Guardium Cryptography Mgr</button>
   </div>
 
   <!-- ══════════════════════════════════════════
@@ -1392,6 +1410,719 @@ oc exec -n &lt;namespace&gt; &lt;patroni-leader-pod&gt; -- \
     </section>
 
   </div><!-- /tab-datastage -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 4 — InfoSphere CDC
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-cdc">
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#cdc-overview">Overview</a></li>
+        <li><a href="#cdc-arch">Architecture &amp; Components</a></li>
+        <li><a href="#cdc-replication">Replication Topologies</a></li>
+        <li><a href="#cdc-network">Network Requirements</a></li>
+        <li><a href="#cdc-monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#cdc-failover">Failover Procedures</a></li>
+        <li><a href="#cdc-checklist">Pre-Production Checklist</a></li>
+      </ol>
+    </nav>
+
+    <section id="cdc-overview">
+      <h2 class="section-title accent-cdc">1. Overview</h2>
+      <p>IBM InfoSphere Change Data Capture (CDC) provides real-time, log-based data replication between heterogeneous databases and message queues. It captures changes at the source transaction log level and delivers them to one or more targets with minimal impact on source systems.</p>
+      <table>
+        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Replication lag (LAN)</td><td>&lt; 1 second</td></tr>
+          <tr><td>Replication lag (WAN)</td><td>&lt; 5 seconds</td></tr>
+          <tr><td>Source CPU overhead</td><td>&lt; 5% additional</td></tr>
+          <tr><td>RTO (subscription restart)</td><td>&lt; 2 minutes</td></tr>
+          <tr><td>Data delivery guarantee</td><td>At-least-once (idempotent targets recommended)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="cdc-arch">
+      <h2 class="section-title accent-cdc">2. Architecture &amp; Components</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>HA Strategy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>CDC Source Engine</strong></td><td>Reads source DB transaction log; captures DML changes</td><td>Active/passive HA — engine restarts from bookmark on failure</td></tr>
+          <tr><td><strong>CDC Target Engine</strong></td><td>Applies captured changes to target system</td><td>Auto-reconnect; bookmarked position survives restart</td></tr>
+          <tr><td><strong>Management Console (CHCCLP)</strong></td><td>Configuration, monitoring, subscription management</td><td>Stateless UI — redeploy on any node; config stored in Access Server DB</td></tr>
+          <tr><td><strong>Access Server</strong></td><td>Central metadata and subscription repository</td><td>Active/passive behind VIP; backed by HA database</td></tr>
+          <tr><td><strong>Datastore</strong></td><td>Logical connection to a source or target system</td><td>One engine per datastore; failover by restarting engine on standby host</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>Bookmark-Based Recovery</strong>
+        CDC stores a bookmark (log position) for every subscription. On engine restart, replication resumes from the last committed bookmark — no data is lost and no full refresh is required.
+      </div>
+    </section>
+
+    <section id="cdc-replication">
+      <h2 class="section-title accent-cdc">3. Replication Topologies</h2>
+      <table>
+        <thead><tr><th>Pattern</th><th>Description</th><th>Use Case</th></tr></thead>
+        <tbody>
+          <tr><td><strong>One-to-One</strong></td><td>Single source → single target</td><td>DR replication, data migration</td></tr>
+          <tr><td><strong>One-to-Many</strong></td><td>Single source → multiple targets</td><td>Analytics offload, multi-region DR</td></tr>
+          <tr><td><strong>Many-to-One (consolidation)</strong></td><td>Multiple sources → single target</td><td>Central reporting database, data warehouse feed</td></tr>
+          <tr><td><strong>Bidirectional (active-active)</strong></td><td>Source ↔ target replicate to each other</td><td>Geographic active-active; requires conflict detection</td></tr>
+          <tr><td><strong>Cascading</strong></td><td>Source → intermediate → target</td><td>WAN relay; reduce source load</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <strong>Bidirectional Conflict Detection</strong>
+        In active-active topologies, configure conflict detection rules (timestamp-based or custom stored procedure). Without conflict detection, last-write-wins may cause silent data corruption.
+      </div>
+    </section>
+
+    <section id="cdc-network">
+      <h2 class="section-title accent-cdc">4. Network Requirements</h2>
+      <table>
+        <thead><tr><th>Parameter</th><th>Requirement</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Source engine → target engine port</td><td>Dedicated TCP (default 11701)</td><td>Bind to specific interface — not 0.0.0.0</td></tr>
+          <tr><td>Engine → Access Server port</td><td>TCP 10101 (default)</td><td>Encrypted with TLS 1.2+</td></tr>
+          <tr><td>Bandwidth</td><td>≥ peak change rate × 1.5</td><td>Provision for burst during batch updates</td></tr>
+          <tr><td>Latency (LAN replication)</td><td>&lt; 5 ms</td><td>Higher latency increases replication lag</td></tr>
+          <tr><td>TLS</td><td>TLS 1.2+ mandatory for all inter-engine communication</td><td>Certificates must be rotated annually</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="cdc-monitoring">
+      <h2 class="section-title accent-cdc">5. Monitoring &amp; Alerting</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>Subscription state</td><td>CHCCLP / Access Server API</td><td>Alert on any state ≠ Active</td></tr>
+          <tr><td>Replication latency</td><td>CDC latency monitor</td><td>&gt; 30 s (LAN), &gt; 5 min (WAN)</td></tr>
+          <tr><td>Source log retention risk</td><td>Source DB log space monitor</td><td>Alert when log space &lt; 20% — purge will break bookmark</td></tr>
+          <tr><td>Target apply errors</td><td>CDC event log</td><td>Any constraint violation or apply error</td></tr>
+          <tr><td>Engine process health</td><td>OS process / cluster agent</td><td>Process down &gt; 30 s</td></tr>
+        </tbody>
+      </table>
+      <div class="callout danger">
+        <strong>Source Log Retention</strong>
+        If source DB logs are purged before CDC reads them, the subscription must be refreshed (full initial load). Ensure source log retention covers at least 2× your maximum expected engine downtime.
+      </div>
+    </section>
+
+    <section id="cdc-failover">
+      <h2 class="section-title accent-cdc">6. Failover Procedures</h2>
+      <h3 class="sub-title">Engine Failover</h3>
+      <pre><code># 1. Stop subscription cleanly (if engine is reachable)
+chcclp -url https://&lt;access_server&gt;:10101 -user &lt;user&gt; -password &lt;pwd&gt;
+  stop subscription &lt;sub_name&gt; datastore &lt;source_ds&gt;
+
+# 2. On standby node, start CDC engine
+./dmconfigurets -id &lt;datastore_id&gt; start
+
+# 3. Restart subscription — resumes from last bookmark
+chcclp start subscription &lt;sub_name&gt; datastore &lt;source_ds&gt;</code></pre>
+      <h3 class="sub-title">Access Server Failover</h3>
+      <pre><code># Move VIP to standby Access Server node
+# Ensure Access Server DB (Db2 / PostgreSQL) has been failed over first
+# Then start Access Server service on standby
+./dmconfigurets -accessserver start
+# Reconnect Management Console to new Access Server IP</code></pre>
+    </section>
+
+    <section id="cdc-checklist">
+      <h2 class="section-title accent-cdc">7. Pre-Production Checklist</h2>
+      <ul class="checklist">
+        <li><span class="tick"></span>Source log retention covers ≥ 2× expected maximum engine downtime</li>
+        <li><span class="tick"></span>Bookmark persistence verified (engine restart + subscription resume tested)</li>
+        <li><span class="tick"></span>All inter-engine communication encrypted with TLS 1.2+</li>
+        <li><span class="tick"></span>Engine services bound to specific IPs — not 0.0.0.0</li>
+        <li><span class="tick"></span>Access Server backed by HA database (Db2 HADR or PostgreSQL)</li>
+        <li><span class="tick"></span>Conflict detection rules configured for bidirectional topologies</li>
+        <li><span class="tick"></span>Replication latency monitoring and alerting configured</li>
+        <li><span class="tick"></span>Engine failover procedure tested and RTO measured</li>
+        <li><span class="tick"></span>Access Server failover procedure tested</li>
+        <li><span class="tick"></span>Subscription restart after full engine downtime verified</li>
+        <li><span class="tick"></span>DR runbook documented and approved</li>
+      </ul>
+    </section>
+
+  </div><!-- /tab-cdc -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 5 — watsonx.data Integration
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-wxdi">
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#wxdi-overview">Overview</a></li>
+        <li><a href="#wxdi-arch">Architecture &amp; HA Layers</a></li>
+        <li><a href="#wxdi-engines">Query Engine Resilience</a></li>
+        <li><a href="#wxdi-catalog">Metastore &amp; Catalog HA</a></li>
+        <li><a href="#wxdi-storage">Object Storage</a></li>
+        <li><a href="#wxdi-monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#wxdi-checklist">Pre-Production Checklist</a></li>
+      </ol>
+    </nav>
+
+    <section id="wxdi-overview">
+      <h2 class="section-title accent-wxdi">1. Overview</h2>
+      <p>IBM watsonx.data Integration is the open lakehouse data integration layer — connecting Presto/Spark query engines, Apache Iceberg tables, and heterogeneous data sources via a unified catalog and governance layer. HA spans the query engine, catalog, and object storage tiers.</p>
+      <table>
+        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Query engine RTO</td><td>&lt; 5 minutes (auto-restart)</td></tr>
+          <tr><td>Catalog RPO</td><td>Near-zero (replicated metastore)</td></tr>
+          <tr><td>Data RPO</td><td>Zero (immutable Iceberg snapshots)</td></tr>
+          <tr><td>Object storage availability</td><td>99.999% (multi-AZ COS buckets)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdi-arch">
+      <h2 class="section-title accent-wxdi">2. Architecture &amp; HA Layers</h2>
+      <table>
+        <thead><tr><th>Layer</th><th>Component</th><th>HA Strategy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Query Engine</strong></td><td>Presto coordinator + workers; Spark engine</td><td>Auto-restart on failure; stateless workers replaced automatically by platform operator</td></tr>
+          <tr><td><strong>Metastore Catalog</strong></td><td>Hive Metastore (HMS) or Iceberg REST catalog</td><td>Active/passive HA backed by replicated database (Db2 HADR or PostgreSQL Patroni)</td></tr>
+          <tr><td><strong>Object Storage</strong></td><td>IBM Cloud Object Storage / S3-compatible</td><td>Multi-AZ replication; Iceberg snapshots provide point-in-time recovery</td></tr>
+          <tr><td><strong>Control Plane</strong></td><td>watsonx.data management console</td><td>Deployed on HA OpenShift cluster; etcd and API server HA built-in</td></tr>
+          <tr><td><strong>Ingestion Connectors</strong></td><td>Kafka, JDBC, S3 connectors</td><td>Connector restart policies; offset/bookmark persistence in connector state store</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdi-engines">
+      <h2 class="section-title accent-wxdi">3. Query Engine Resilience</h2>
+      <table>
+        <thead><tr><th>Failure</th><th>Behaviour</th><th>Recovery</th></tr></thead>
+        <tbody>
+          <tr><td>Worker pod crash</td><td>Coordinator detects lost worker; in-flight query fails</td><td>Worker replaced automatically by OpenShift operator; client retries query</td></tr>
+          <tr><td>Coordinator crash</td><td>All active queries fail; engine unavailable</td><td>Operator restarts coordinator pod; RTO &lt; 5 min</td></tr>
+          <tr><td>Spark driver crash</td><td>Spark application fails</td><td>Spark retry policy; checkpoint-enabled jobs resume from last checkpoint</td></tr>
+          <tr><td>Network partition</td><td>Workers unable to reach coordinator</td><td>Coordinator marks workers unhealthy; operator reschedules on reachable nodes</td></tr>
+        </tbody>
+      </table>
+      <div class="callout green">
+        <strong>Iceberg Snapshot Safety Net</strong>
+        Every write creates an immutable snapshot. Previous snapshots remain accessible for point-in-time recovery without additional backup tooling.
+      </div>
+    </section>
+
+    <section id="wxdi-catalog">
+      <h2 class="section-title accent-wxdi">4. Metastore &amp; Catalog HA</h2>
+      <table>
+        <thead><tr><th>Deployment</th><th>HA Technology</th><th>RPO</th></tr></thead>
+        <tbody>
+          <tr><td>Hive Metastore (Db2-backed)</td><td>Db2 HADR (SYNC)</td><td>Zero</td></tr>
+          <tr><td>Hive Metastore (PostgreSQL-backed)</td><td>EDB Patroni / Crunchy Data</td><td>Near-zero</td></tr>
+          <tr><td>Iceberg REST Catalog</td><td>Stateless pods behind load balancer; backed by HA DB</td><td>Near-zero</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <strong>Metastore is Critical Path</strong>
+        A metastore outage blocks all new queries and table writes. Prioritise Tier 1 HA for the metastore database.
+      </div>
+    </section>
+
+    <section id="wxdi-storage">
+      <h2 class="section-title accent-wxdi">5. Object Storage</h2>
+      <table>
+        <thead><tr><th>Requirement</th><th>Configuration</th></tr></thead>
+        <tbody>
+          <tr><td>Multi-AZ replication</td><td>Enable cross-zone replication on all lakehouse buckets</td></tr>
+          <tr><td>Versioning</td><td>Enable object versioning to protect against accidental deletes</td></tr>
+          <tr><td>Iceberg maintenance</td><td>Schedule expire-snapshots and remove-orphan-files jobs weekly</td></tr>
+          <tr><td>Encryption</td><td>Server-side encryption with customer-managed keys (IBM Key Protect)</td></tr>
+          <tr><td>Network binding</td><td>COS endpoints bound to private network; no public endpoint without auth</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdi-monitoring">
+      <h2 class="section-title accent-wxdi">6. Monitoring &amp; Alerting</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>Query engine pod health</td><td>OpenShift pod status</td><td>Any pod CrashLoopBackOff or Pending &gt; 2 min</td></tr>
+          <tr><td>Metastore connectivity</td><td>HMS health endpoint</td><td>Unavailable &gt; 30 s</td></tr>
+          <tr><td>Object storage availability</td><td>COS health API</td><td>Error rate &gt; 0.1% on write operations</td></tr>
+          <tr><td>Query latency P99</td><td>Presto metrics / Prometheus</td><td>&gt; 2× baseline for &gt; 5 min</td></tr>
+          <tr><td>Failed ingestion jobs</td><td>Spark history server / connector logs</td><td>Any job failure not auto-recovered within 15 min</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdi-checklist">
+      <h2 class="section-title accent-wxdi">7. Pre-Production Checklist</h2>
+      <ul class="checklist">
+        <li><span class="tick"></span>Presto/Spark engines deployed with auto-restart policy in operator config</li>
+        <li><span class="tick"></span>Metastore backed by HA database (Db2 HADR SYNC or PostgreSQL Patroni)</li>
+        <li><span class="tick"></span>Object storage buckets configured with multi-AZ replication</li>
+        <li><span class="tick"></span>Iceberg maintenance jobs scheduled (expire snapshots, remove orphan files)</li>
+        <li><span class="tick"></span>Control plane on multi-node OpenShift with etcd quorum ≥ 3 nodes</li>
+        <li><span class="tick"></span>Engine restart tested and RTO measured against target</li>
+        <li><span class="tick"></span>Metastore failover tested end-to-end (query resumption verified)</li>
+        <li><span class="tick"></span>COS encryption with customer-managed keys configured</li>
+        <li><span class="tick"></span>All service ports bound to specific IPs — not 0.0.0.0</li>
+        <li><span class="tick"></span>Monitoring alerts configured for engine health, metastore, COS, latency</li>
+      </ul>
+    </section>
+
+  </div><!-- /tab-wxdi -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 6 — watsonx.data Intelligence
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-wxdint">
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#wxdint-overview">Overview</a></li>
+        <li><a href="#wxdint-arch">Architecture &amp; Components</a></li>
+        <li><a href="#wxdint-catalog">Knowledge Catalog HA</a></li>
+        <li><a href="#wxdint-governance">Governance Services</a></li>
+        <li><a href="#wxdint-monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#wxdint-checklist">Pre-Production Checklist</a></li>
+      </ol>
+    </nav>
+
+    <section id="wxdint-overview">
+      <h2 class="section-title accent-wxdint">1. Overview</h2>
+      <p>IBM watsonx.data Intelligence (formerly IBM Knowledge Catalog / Watson Knowledge Catalog) provides enterprise data governance, data quality, and AI-powered metadata management. HA design covers the catalog services, governance policy engine, lineage store, and backing databases.</p>
+      <table>
+        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Catalog service RTO</td><td>&lt; 5 minutes</td></tr>
+          <tr><td>Governance metadata RPO</td><td>Near-zero (synchronous DB replication)</td></tr>
+          <tr><td>Search index RPO</td><td>&lt; 15 minutes (Elasticsearch/OpenSearch snapshot)</td></tr>
+          <tr><td>Lineage store RPO</td><td>Near-zero</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdint-arch">
+      <h2 class="section-title accent-wxdint">2. Architecture &amp; Components</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>HA Strategy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Catalog Service</strong></td><td>Asset registration, metadata search, classification</td><td>Stateless pods; ≥ 2 replicas behind load balancer</td></tr>
+          <tr><td><strong>Governance Policy Engine</strong></td><td>Enforces data policies, masking rules, access controls</td><td>Stateless pods; ≥ 2 replicas; policy store in HA DB</td></tr>
+          <tr><td><strong>Metadata Database</strong></td><td>Stores catalog assets, terms, lineage</td><td>Db2 HADR (SYNC) or PostgreSQL Patroni</td></tr>
+          <tr><td><strong>Search Index</strong></td><td>Elasticsearch / OpenSearch for full-text asset search</td><td>3-node cluster (1 primary + 2 replicas); daily snapshots to COS</td></tr>
+          <tr><td><strong>Lineage Store</strong></td><td>Tracks data provenance and transformation history</td><td>Graph DB backed by HA relational store</td></tr>
+          <tr><td><strong>AI Services</strong></td><td>Auto-tagging, data quality scoring</td><td>Stateless pods; scalable via Kubernetes HPA</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdint-catalog">
+      <h2 class="section-title accent-wxdint">3. Knowledge Catalog HA</h2>
+      <table>
+        <thead><tr><th>Backing Store</th><th>HA Technology</th><th>RPO</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>Metadata DB (Db2)</td><td>Db2 HADR (SYNC)</td><td>Zero</td><td>See Db2 tab for configuration</td></tr>
+          <tr><td>Metadata DB (PostgreSQL)</td><td>EDB Patroni</td><td>Near-zero</td><td>Managed by CP4D operator</td></tr>
+          <tr><td>Search Index</td><td>OpenSearch 3-node cluster</td><td>&lt; 15 min (snapshot-based)</td><td>Enable automated snapshots to COS every 15 min</td></tr>
+          <tr><td>Object Assets (files)</td><td>Multi-AZ COS bucket</td><td>Zero</td><td>Files stored as COS objects, not on local disk</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdint-governance">
+      <h2 class="section-title accent-wxdint">4. Governance Services</h2>
+      <p>Governance policies (masking rules, data classes, business terms) are stored in the metadata database. Policy enforcement is performed by stateless pods that read policies at request time.</p>
+      <div class="callout warn">
+        <strong>Policy Enforcement is Blocking</strong>
+        A governance policy engine outage can block data access for protected assets. Deploy ≥ 2 policy engine pods across different availability zones. Configure a circuit-breaker with a defined fail-open or fail-closed policy based on your security posture.
+      </div>
+      <table>
+        <thead><tr><th>Governance Component</th><th>Minimum Replicas</th><th>Fail Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>Policy engine pods</td><td>2 (different AZs)</td><td>Fail-closed: block access if no pod reachable</td></tr>
+          <tr><td>Classification service</td><td>2</td><td>Fail-open: classification skipped; alert triggered</td></tr>
+          <tr><td>Lineage collector</td><td>1 + persistent queue</td><td>Queue events during outage; replay on recovery</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdint-monitoring">
+      <h2 class="section-title accent-wxdint">5. Monitoring &amp; Alerting</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>Catalog service pod health</td><td>OpenShift pod status</td><td>Any pod unavailable &gt; 1 min</td></tr>
+          <tr><td>Metadata DB health</td><td>MON_GET_HADR / Patroni API</td><td>HADR state ≠ PEER or leader unavailable</td></tr>
+          <tr><td>Search index cluster health</td><td>OpenSearch /_cluster/health</td><td>Status = red or yellow &gt; 5 min</td></tr>
+          <tr><td>Policy enforcement latency</td><td>Policy engine metrics</td><td>P99 &gt; 500 ms</td></tr>
+          <tr><td>Asset scan failures</td><td>Classification job logs</td><td>Any scan failure unresolved after 2 retries</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="wxdint-checklist">
+      <h2 class="section-title accent-wxdint">6. Pre-Production Checklist</h2>
+      <ul class="checklist">
+        <li><span class="tick"></span>Catalog and policy engine pods deployed with ≥ 2 replicas across AZs</li>
+        <li><span class="tick"></span>Metadata database deployed with HA (Db2 HADR or PostgreSQL Patroni)</li>
+        <li><span class="tick"></span>OpenSearch cluster configured with 3 nodes (1 primary + 2 replicas)</li>
+        <li><span class="tick"></span>Automated index snapshots to COS every 15 minutes</li>
+        <li><span class="tick"></span>Object asset storage on multi-AZ COS bucket</li>
+        <li><span class="tick"></span>Policy engine fail-open/fail-closed behaviour documented and tested</li>
+        <li><span class="tick"></span>Governance metadata DR drill completed (metadata DB failover + catalog reconnect)</li>
+        <li><span class="tick"></span>All service ports bound to specific IPs — not 0.0.0.0</li>
+        <li><span class="tick"></span>Monitoring alerts configured for catalog, policy engine, search, DB health</li>
+        <li><span class="tick"></span>Lineage event replay tested after collector outage</li>
+      </ul>
+    </section>
+
+  </div><!-- /tab-wxdint -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 7 — Guardium Data Protection
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-gdp">
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#gdp-overview">Overview</a></li>
+        <li><a href="#gdp-arch">Architecture &amp; Components</a></li>
+        <li><a href="#gdp-ha">HA Topologies</a></li>
+        <li><a href="#gdp-network">Network Requirements</a></li>
+        <li><a href="#gdp-monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#gdp-checklist">Pre-Production Checklist</a></li>
+      </ol>
+    </nav>
+
+    <section id="gdp-overview">
+      <h2 class="section-title accent-gdp">1. Overview</h2>
+      <p>IBM Guardium Data Protection monitors, audits, and protects sensitive data across databases, data warehouses, big data platforms, and cloud environments in real time. It deploys lightweight S-TAP agents on database servers that forward activity to centralised Collector appliances.</p>
+      <table>
+        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>S-TAP → Collector latency</td><td>&lt; 500 ms</td></tr>
+          <tr><td>Audit data loss on Collector failure</td><td>Zero (S-TAP buffers and re-routes)</td></tr>
+          <tr><td>Central Manager RTO</td><td>&lt; 15 minutes (active/passive failover)</td></tr>
+          <tr><td>Collector RTO</td><td>&lt; 2 minutes (S-TAP auto-failover to secondary)</td></tr>
+          <tr><td>Audit data retention</td><td>≥ 90 days online; archive to COS for long-term</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdp-arch">
+      <h2 class="section-title accent-gdp">2. Architecture &amp; Components</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>HA Strategy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>S-TAP Agent</strong></td><td>Lightweight kernel-level agent on DB server; intercepts SQL traffic</td><td>Agent itself is HA-passive — buffers locally and fails over to secondary Collector</td></tr>
+          <tr><td><strong>Collector</strong></td><td>Receives and analyses activity from S-TAPs; enforces real-time policies</td><td>Primary + secondary Collector pair; S-TAP automatically routes to secondary on primary failure</td></tr>
+          <tr><td><strong>Aggregator</strong></td><td>Consolidates audit data from multiple Collectors for reporting</td><td>Active/passive with scheduled data sync to secondary</td></tr>
+          <tr><td><strong>Central Manager (GCM)</strong></td><td>Centralised policy distribution, user management, reporting</td><td>Active/passive HA; configuration backed up to secondary nightly</td></tr>
+          <tr><td><strong>Archive Store</strong></td><td>Long-term audit log storage</td><td>IBM COS or GPFS with multi-AZ replication</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdp-ha">
+      <h2 class="section-title accent-gdp">3. HA Topologies</h2>
+      <h3 class="sub-title">S-TAP Failover Configuration</h3>
+      <pre><code># Configure primary and secondary Collector in S-TAP config
+# /etc/guard/guard_stap.ini
+PRIMARY_HOST=&lt;collector1_ip&gt;
+PRIMARY_PORT=16016
+SECONDARY_HOST=&lt;collector2_ip&gt;
+SECONDARY_PORT=16016
+FAILOVER_TIMEOUT=30         # seconds before switching to secondary
+BUFFER_SIZE=500             # MB of local buffering during failover</code></pre>
+      <h3 class="sub-title">Collector Pair Setup</h3>
+      <table>
+        <thead><tr><th>Parameter</th><th>Primary Collector</th><th>Secondary Collector</th></tr></thead>
+        <tbody>
+          <tr><td>Role</td><td>Active — receives all S-TAP traffic</td><td>Passive — hot standby</td></tr>
+          <tr><td>S-TAP connection</td><td>Primary port 16016</td><td>Secondary port 16016</td></tr>
+          <tr><td>Data sync</td><td>Sends incremental sync to secondary every 5 min</td><td>Receives sync; ready to activate</td></tr>
+          <tr><td>Failover trigger</td><td>Heartbeat timeout from S-TAP</td><td>S-TAP connects automatically</td></tr>
+        </tbody>
+      </table>
+      <div class="callout">
+        <strong>Zero Audit Data Loss</strong>
+        S-TAP buffers audit events locally during Collector failover. Once the secondary Collector is active, buffered events are forwarded. No events are dropped.
+      </div>
+    </section>
+
+    <section id="gdp-network">
+      <h2 class="section-title accent-gdp">4. Network Requirements</h2>
+      <table>
+        <thead><tr><th>Interface</th><th>Requirement</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>S-TAP → Collector</td><td>TCP 16016; dedicated replication interface</td><td>Never bind to 0.0.0.0; TLS 1.2+ mandatory</td></tr>
+          <tr><td>Collector → Central Manager</td><td>TCP 8443 (HTTPS)</td><td>TLS 1.2+ with certificate validation</td></tr>
+          <tr><td>Collector → Aggregator</td><td>TCP 16016 (encrypted)</td><td>Dedicated aggregation network recommended</td></tr>
+          <tr><td>Collector → Archive Store</td><td>HTTPS / S3 API to COS</td><td>TLS 1.3 preferred</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdp-monitoring">
+      <h2 class="section-title accent-gdp">5. Monitoring &amp; Alerting</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>S-TAP connection status</td><td>Guardium Central Manager dashboard</td><td>Any S-TAP disconnected &gt; 2 min</td></tr>
+          <tr><td>Collector queue depth</td><td>Collector metrics API</td><td>Queue &gt; 10,000 events (processing lag)</td></tr>
+          <tr><td>Policy violation rate</td><td>Guardium real-time alerts</td><td>Anomalous spike (&gt; 5× baseline) in any 5-min window</td></tr>
+          <tr><td>Collector disk usage</td><td>OS / Collector health</td><td>Audit disk &gt; 80% — triggers archival to COS</td></tr>
+          <tr><td>Central Manager health</td><td>GCM health endpoint</td><td>Unavailable &gt; 5 min</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdp-checklist">
+      <h2 class="section-title accent-gdp">6. Pre-Production Checklist</h2>
+      <ul class="checklist">
+        <li><span class="tick"></span>Primary + secondary Collector pair configured and heartbeat tested</li>
+        <li><span class="tick"></span>S-TAP failover to secondary Collector tested (primary taken offline)</li>
+        <li><span class="tick"></span>S-TAP local buffer size set to cover expected failover window</li>
+        <li><span class="tick"></span>All S-TAP → Collector communication encrypted with TLS 1.2+</li>
+        <li><span class="tick"></span>All network interfaces bound to specific IPs — not 0.0.0.0</li>
+        <li><span class="tick"></span>Central Manager active/passive failover tested</li>
+        <li><span class="tick"></span>Audit data archive job to COS configured and tested</li>
+        <li><span class="tick"></span>Audit data retention ≥ 90 days online verified</li>
+        <li><span class="tick"></span>Real-time policy violation alerts configured and tested end-to-end</li>
+        <li><span class="tick"></span>DR runbook reviewed and approved by security team</li>
+      </ul>
+    </section>
+
+  </div><!-- /tab-gdp -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 8 — Guardium Discover & Classify
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-gdc">
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#gdc-overview">Overview</a></li>
+        <li><a href="#gdc-arch">Architecture &amp; Components</a></li>
+        <li><a href="#gdc-ha">HA Configuration</a></li>
+        <li><a href="#gdc-monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#gdc-checklist">Pre-Production Checklist</a></li>
+      </ol>
+    </nav>
+
+    <section id="gdc-overview">
+      <h2 class="section-title accent-gdc">1. Overview</h2>
+      <p>IBM Guardium Discover and Classify automatically discovers sensitive data across structured and unstructured data stores, classifies it by data type and sensitivity level, and produces compliance-ready inventory reports. It integrates with Guardium Data Protection for unified governance.</p>
+      <table>
+        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Discovery scan RTO (resume after failure)</td><td>&lt; 10 minutes (resume from last checkpoint)</td></tr>
+          <tr><td>Classification results RPO</td><td>Near-zero (results stored in HA DB)</td></tr>
+          <tr><td>Scan scheduler RTO</td><td>&lt; 5 minutes</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdc-arch">
+      <h2 class="section-title accent-gdc">2. Architecture &amp; Components</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>HA Strategy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Discovery Engine</strong></td><td>Connects to data sources; scans for sensitive data patterns</td><td>Stateless scanner pods; scan state checkpointed in HA DB</td></tr>
+          <tr><td><strong>Classification Engine</strong></td><td>Applies classification rules (PII, PCI, HIPAA, etc.)</td><td>Stateless pods; rules stored in HA metadata DB</td></tr>
+          <tr><td><strong>Scan Scheduler</strong></td><td>Orchestrates scheduled and on-demand discovery scans</td><td>Active/passive; schedule state in HA DB</td></tr>
+          <tr><td><strong>Results Database</strong></td><td>Stores discovered asset inventory and classification results</td><td>Db2 HADR (SYNC) or PostgreSQL Patroni</td></tr>
+          <tr><td><strong>Connector Library</strong></td><td>JDBC/ODBC connectors to databases, file systems, cloud storage</td><td>Stateless; re-authenticate on reconnect</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdc-ha">
+      <h2 class="section-title accent-gdc">3. HA Configuration</h2>
+      <div class="callout">
+        <strong>Scan Checkpointing</strong>
+        Discovery scans checkpoint progress every N records (configurable). On engine restart, the scan resumes from the last checkpoint — preventing full re-scans after failure.
+      </div>
+      <table>
+        <thead><tr><th>Parameter</th><th>Recommended Value</th><th>Rationale</th></tr></thead>
+        <tbody>
+          <tr><td>Scan checkpoint interval</td><td>10,000 records or 5 minutes</td><td>Limits re-work after failure to last checkpoint</td></tr>
+          <tr><td>Results DB backing store</td><td>Db2 HADR SYNC or PostgreSQL Patroni</td><td>Zero RPO for discovered inventory</td></tr>
+          <tr><td>Scanner pod replicas</td><td>2 (active-standby per scan job)</td><td>One pod runs the scan; standby takes over on failure</td></tr>
+          <tr><td>Connection pool timeout</td><td>30 seconds</td><td>Fail fast on lost DB connections; retry with backoff</td></tr>
+          <tr><td>Credential storage</td><td>IBM Key Protect or HashiCorp Vault</td><td>No hardcoded credentials in scan configs</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdc-monitoring">
+      <h2 class="section-title accent-gdc">4. Monitoring &amp; Alerting</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>Scan job status</td><td>Scheduler API / job logs</td><td>Any scheduled scan not started within 30 min of scheduled time</td></tr>
+          <tr><td>Discovery engine health</td><td>Pod / process monitor</td><td>Engine down &gt; 5 min</td></tr>
+          <tr><td>Results DB health</td><td>MON_GET_HADR / Patroni API</td><td>DB state not healthy</td></tr>
+          <tr><td>Classification rule errors</td><td>Classification engine logs</td><td>Any unhandled rule evaluation error</td></tr>
+          <tr><td>Data source connectivity</td><td>Connector health checks</td><td>Any configured data source unreachable for &gt; 1 hour</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gdc-checklist">
+      <h2 class="section-title accent-gdc">5. Pre-Production Checklist</h2>
+      <ul class="checklist">
+        <li><span class="tick"></span>Results database deployed with HA (Db2 HADR or PostgreSQL Patroni)</li>
+        <li><span class="tick"></span>Scan checkpointing interval configured and tested (restart + resume verified)</li>
+        <li><span class="tick"></span>Scanner pod failover tested (pod killed mid-scan; resume from checkpoint)</li>
+        <li><span class="tick"></span>All data source credentials stored in Key Protect / Vault — no hardcoding</li>
+        <li><span class="tick"></span>All service ports bound to specific IPs — not 0.0.0.0</li>
+        <li><span class="tick"></span>TLS 1.2+ on all connections to data sources and results DB</li>
+        <li><span class="tick"></span>Scan scheduler failover tested</li>
+        <li><span class="tick"></span>Classification rule set reviewed and approved by data governance team</li>
+        <li><span class="tick"></span>Monitoring alerts configured for scan jobs, engine health, DB, connectors</li>
+        <li><span class="tick"></span>Full DR drill completed and RTO measured</li>
+      </ul>
+    </section>
+
+  </div><!-- /tab-gdc -->
+
+
+  <!-- ══════════════════════════════════════════
+       TAB 9 — Guardium Cryptography Manager
+  ══════════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-gcm">
+    <nav class="toc">
+      <h2>Contents</h2>
+      <ol>
+        <li><a href="#gcm-overview">Overview</a></li>
+        <li><a href="#gcm-arch">Architecture &amp; Components</a></li>
+        <li><a href="#gcm-ha">HA Configuration</a></li>
+        <li><a href="#gcm-keys">Key Management &amp; Rotation</a></li>
+        <li><a href="#gcm-monitoring">Monitoring &amp; Alerting</a></li>
+        <li><a href="#gcm-checklist">Pre-Production Checklist</a></li>
+      </ol>
+    </nav>
+
+    <section id="gcm-overview">
+      <h2 class="section-title accent-gcm">1. Overview</h2>
+      <p>IBM Guardium Cryptography Manager provides centralised cryptographic key lifecycle management, certificate management, and crypto-agility capabilities. HA is critical — a key manager outage can block decryption of protected data across all connected systems.</p>
+      <div class="callout danger">
+        <strong>Key Manager is Critical Infrastructure</strong>
+        Any system that encrypts data using keys managed by Guardium Cryptography Manager will be unable to decrypt that data during a key manager outage. This product MUST be deployed as Tier 1 HA.
+      </div>
+      <table>
+        <thead><tr><th>Goal</th><th>Target</th></tr></thead>
+        <tbody>
+          <tr><td>Key server RTO</td><td>&lt; 30 seconds (automatic failover)</td></tr>
+          <tr><td>Key store RPO</td><td>Zero (synchronous replication)</td></tr>
+          <tr><td>Key request latency</td><td>&lt; 10 ms (LAN)</td></tr>
+          <tr><td>Availability</td><td>99.999% (five nines — Tier 1 mandatory)</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gcm-arch">
+      <h2 class="section-title accent-gcm">2. Architecture &amp; Components</h2>
+      <table>
+        <thead><tr><th>Component</th><th>Role</th><th>HA Strategy</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Key Server (Primary)</strong></td><td>Serves key requests; manages key lifecycle</td><td>Active — serves all requests</td></tr>
+          <tr><td><strong>Key Server (Secondary)</strong></td><td>Hot standby for instant failover</td><td>Passive — synchronously replicated; promotes automatically on primary failure</td></tr>
+          <tr><td><strong>Key Store (HSM / SW)</strong></td><td>Secure storage for master keys</td><td>Hardware HSM preferred (FIPS 140-2 Level 3); replicated across both nodes</td></tr>
+          <tr><td><strong>Certificate Authority</strong></td><td>Issues and revokes TLS/code-signing certificates</td><td>Active/passive with OCSP responder on both nodes</td></tr>
+          <tr><td><strong>Management Console</strong></td><td>Policy configuration, key inventory, audit</td><td>Stateless pods behind load balancer</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gcm-ha">
+      <h2 class="section-title accent-gcm">3. HA Configuration</h2>
+      <h3 class="sub-title">Primary / Secondary Replication</h3>
+      <pre><code># Configure synchronous key replication (Guardium Cryptography Manager CLI)
+gkmcli replication configure \
+  --primary   &lt;primary_ip&gt;:9443 \
+  --secondary &lt;secondary_ip&gt;:9443 \
+  --mode      synchronous \
+  --tls-cert  /etc/gkm/replication.pem
+
+# Verify replication state
+gkmcli replication status
+# Expected: state=SYNCHRONISED, lag=0ms</code></pre>
+      <h3 class="sub-title">Client Failover</h3>
+      <table>
+        <thead><tr><th>Client Config</th><th>Value</th></tr></thead>
+        <tbody>
+          <tr><td>Primary key server</td><td>&lt;primary_ip&gt;:9443</td></tr>
+          <tr><td>Fallback key server</td><td>&lt;secondary_ip&gt;:9443</td></tr>
+          <tr><td>Connection timeout</td><td>5 seconds (fail fast)</td></tr>
+          <tr><td>Retry on failure</td><td>3 attempts to primary, then switch to secondary</td></tr>
+          <tr><td>TLS</td><td>TLS 1.3 required; certificate pinning recommended</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gcm-keys">
+      <h2 class="section-title accent-gcm">4. Key Management &amp; Rotation</h2>
+      <table>
+        <thead><tr><th>Key Type</th><th>Rotation Frequency</th><th>Process</th></tr></thead>
+        <tbody>
+          <tr><td>Data Encryption Keys (DEKs)</td><td>Annual or on compromise</td><td>Re-encrypt all data protected by expiring DEK; use key versioning for zero-downtime rotation</td></tr>
+          <tr><td>Key Encryption Keys (KEKs)</td><td>Annual</td><td>Re-wrap all DEKs with new KEK; no data re-encryption required</td></tr>
+          <tr><td>TLS Server Certificates</td><td>Annual (or 90 days for publicly trusted)</td><td>Automated renewal via ACME / cert-manager; alert 30 days before expiry</td></tr>
+          <tr><td>HSM Master Key</td><td>Every 3 years or on HSM replacement</td><td>Ceremony process with quorum (M-of-N custodians); full audit trail required</td></tr>
+        </tbody>
+      </table>
+      <div class="callout warn">
+        <strong>Key Ceremony Documentation</strong>
+        Every HSM master key ceremony must be documented with participant identities, timestamps, and dual-control signatures. Store ceremony records in an access-controlled, tamper-evident system.
+      </div>
+    </section>
+
+    <section id="gcm-monitoring">
+      <h2 class="section-title accent-gcm">5. Monitoring &amp; Alerting</h2>
+      <table>
+        <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
+        <tbody>
+          <tr><td>Replication state</td><td>GKM replication status API</td><td>State ≠ SYNCHRONISED — immediate alert</td></tr>
+          <tr><td>Key request latency</td><td>GKM metrics / Prometheus</td><td>P99 &gt; 50 ms</td></tr>
+          <tr><td>Key server availability</td><td>Health check endpoint</td><td>Primary or secondary unavailable &gt; 10 s</td></tr>
+          <tr><td>Certificate expiry</td><td>cert-manager / GKM cert inventory</td><td>Any certificate expiring within 30 days</td></tr>
+          <tr><td>HSM health</td><td>HSM SNMP / syslog</td><td>Any HSM fault or tamper event — immediate escalation</td></tr>
+          <tr><td>Failed key operations</td><td>GKM audit log</td><td>Any authorisation failure on key operations</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="gcm-checklist">
+      <h2 class="section-title accent-gcm">6. Pre-Production Checklist</h2>
+      <ul class="checklist">
+        <li><span class="tick"></span>Primary + secondary key server configured with synchronous replication</li>
+        <li><span class="tick"></span>Replication state SYNCHRONISED confirmed under load</li>
+        <li><span class="tick"></span>Automatic failover tested — primary taken offline, secondary promoted, clients reconnected</li>
+        <li><span class="tick"></span>RTO ≤ 30 seconds measured and confirmed</li>
+        <li><span class="tick"></span>HSM deployed and master key ceremony completed with full audit trail</li>
+        <li><span class="tick"></span>All key server communication on TLS 1.3 with certificate pinning</li>
+        <li><span class="tick"></span>All network interfaces bound to specific IPs — not 0.0.0.0</li>
+        <li><span class="tick"></span>Key rotation procedures documented and tested for each key type</li>
+        <li><span class="tick"></span>Certificate expiry monitoring configured with 30-day alert threshold</li>
+        <li><span class="tick"></span>HSM health monitoring and tamper alerts configured</li>
+        <li><span class="tick"></span>Key manager classified as Tier 1 — failover automation mandatory</li>
+        <li><span class="tick"></span>DR runbook reviewed and approved by CISO/security team</li>
+      </ul>
+    </section>
+
+  </div><!-- /tab-gcm -->
+
+
 
 </div><!-- /page -->
 
