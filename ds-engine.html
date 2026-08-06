@@ -13,29 +13,42 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
       <div class="list-group list-group-flush">
-        <div class="sidebar-section-label">Db2 HADR</div>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">DataStage HA</div>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">watsonx.data</div>
-        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
-        <div class="sidebar-section-label">General</div>
-        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
-        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+
+        <div class="sidebar-section-label" data-section="general">General <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-general">
+          <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+          <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="db2">Db2 HADR <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-db2">
+          <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="ds">DataStage HA <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-ds">
+          <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="wx">watsonx.data <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-wx">
+          <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        </div>
+
       </div>
     </div>
   <div id="page-content-wrapper">
@@ -55,19 +68,16 @@
 <table class="table table-bordered table-sm">
   <thead><tr><th>Failure Scenario</th><th>Behaviour</th><th>Action Required</th></tr></thead>
   <tbody>
-    <tr><td>Worker node crash during job</td><td>Conductor detects lost worker; job aborted with error code</td><td>Re-trigger job from last checkpoint (if configured)</td></tr>
-    <tr><td>Worker node removed (planned)</td><td>In-flight partitions drained; node removed from pool</td><td>Reduce partition count or add replacement before removal</td></tr>
-    <tr><td>Active conductor crash</td><td>Cluster manager promotes standby conductor; in-flight jobs aborted</td><td>Restart jobs; investigate conductor logs</td></tr>
-    <tr><td>Shared filesystem unavailable</td><td>All jobs fail; conductor cannot load executables</td><td>Restore HA filesystem; no data lost if NFS/GPFS is HA-backed</td></tr>
-    <tr><td>Repository DB unavailable</td><td>Job scheduling and Designer blocked; running jobs unaffected until completion</td><td>Trigger DB failover; DataStage services reconnect automatically</td></tr>
+    <tr><td>Worker node crash during job</td><td>Job aborted with error code</td><td>Re-trigger job from last checkpoint</td></tr>
+    <tr><td>Worker node removed (planned)</td><td>In-flight partitions drained</td><td>Reduce partition count or add replacement before removal</td></tr>
+    <tr><td>Active conductor crash</td><td>Standby conductor promoted; in-flight jobs aborted</td><td>Restart jobs; investigate conductor logs</td></tr>
+    <tr><td>Shared filesystem unavailable</td><td>All jobs fail</td><td>Restore HA filesystem</td></tr>
+    <tr><td>Repository DB unavailable</td><td>Job scheduling blocked; running jobs unaffected</td><td>Trigger DB failover</td></tr>
   </tbody>
 </table>
-
-<h2>Checkpointing Best Practice</h2>
-<p>For long-running jobs, enable <strong>restart capability</strong> using sequential file stages with restart markers, or partition-level checkpoints in the job design. This limits re-work to the last checkpoint rather than a full restart.</p>
 <div class="callout green">
   <strong>Design Jobs for Restartability</strong>
-  Always design DataStage jobs to tolerate a restart from a known-good point. Use surrogate key lookup stages idempotently, and mark intermediate files as persistent so they survive a conductor failover.
+  Always design DataStage jobs to tolerate a restart from a known-good point. Use surrogate key lookup stages idempotently and mark intermediate files as persistent.
 </div>
 
     </div>

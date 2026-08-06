@@ -13,29 +13,42 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
       <div class="list-group list-group-flush">
-        <div class="sidebar-section-label">Db2 HADR</div>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">DataStage HA</div>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">watsonx.data</div>
-        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
-        <div class="sidebar-section-label">General</div>
-        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
-        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+
+        <div class="sidebar-section-label" data-section="general">General <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-general">
+          <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+          <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="db2">Db2 HADR <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-db2">
+          <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="ds">DataStage HA <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-ds">
+          <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="wx">watsonx.data <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-wx">
+          <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        </div>
+
       </div>
     </div>
   <div id="page-content-wrapper">
@@ -53,34 +66,28 @@
 <h1 class="text-db2">Automatic Client Reroute (ACR)</h1>
 <p class="lead text-muted">Redirect application connections automatically after a HADR takeover.</p>
 <hr/>
-<p>ACR allows the Db2 client driver to reconnect to the new primary after takeover without application changes. It relies on the <strong>alternate server</strong> registered in the database directory.</p>
-
+<p>ACR allows the Db2 client driver to reconnect to the new primary after takeover without application changes.</p>
 <h2>Configure Alternate Server</h2>
-<pre><code>-- Run on each client node (not on the database servers)
+<pre><code>-- Run on each client node
 UPDATE ALTERNATE SERVER FOR DATABASE &lt;DBNAME&gt;
   USING HOSTNAME &lt;standby_hostname&gt; PORT &lt;port&gt;
 
--- Verify
-LIST DATABASE DIRECTORY</code></pre>
-
+LIST DATABASE DIRECTORY  -- verify</code></pre>
 <h2>ACR Behaviour by Client State</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Client State at Failover</th><th>ACR Behaviour</th></tr></thead>
   <tbody>
     <tr><td>Idle connection (no active transaction)</td><td>Automatically retried to alternate server — transparent to application</td></tr>
-    <tr><td>Active transaction in progress</td><td>Transaction rolled back; connection retried to new primary — application must handle SQL error and retry</td></tr>
-    <tr><td>No ACR configured</td><td>SQL30081N — manual reconnect required by application</td></tr>
+    <tr><td>Active transaction in progress</td><td>Transaction rolled back; connection retried to new primary</td></tr>
+    <tr><td>No ACR configured</td><td>SQL30081N — manual reconnect required</td></tr>
   </tbody>
 </table>
-
 <div class="callout warn">
-  <strong>ACR ≠ Zero-Downtime</strong>
+  <strong>ACR &ne; Zero-Downtime</strong>
   ACR eliminates manual reconnection but active transactions are still rolled back. Design applications to retry on connection failure.
 </div>
-
-<h2>JDBC / .NET Connection Strings</h2>
-<pre><code>// JDBC — clientRerouteAlternateServerName / Port
-jdbc:db2://&lt;primary_host&gt;:50000/&lt;DBNAME&gt;:
+<h2>JDBC Connection String</h2>
+<pre><code>jdbc:db2://&lt;primary_host&gt;:50000/&lt;DBNAME&gt;:
   clientRerouteAlternateServerName=&lt;standby_host&gt;;
   clientRerouteAlternatePortNumber=50000;
   enableClientAffinitiesList=0;</code></pre>

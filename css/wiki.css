@@ -19,29 +19,48 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
 #sidebar-wrapper .list-group { width: 15rem; }
 #sidebar-wrapper .list-group-item {
   font-size: 13.5px;
-  padding: 0.45rem 1.25rem;
+  padding: 0.45rem 1.25rem 0.45rem 1.6rem;
   border-left: none;
   border-right: none;
   border-radius: 0;
 }
-#sidebar-wrapper .list-group-item.active,
 #sidebar-wrapper .list-group-item:hover { background: #e9ecef !important; color: #0d6efd; }
-#sidebar-wrapper .list-group-item.active { font-weight: 600; }
 
+/* ── Collapsible section labels ── */
 .sidebar-section-label {
-  padding: 0.5rem 1.25rem 0.2rem;
-  font-size: 10.5px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1.25rem;
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: #6c757d;
+  color: #343a40;
   background: #f8f9fa;
   border-top: 1px solid #dee2e6;
-  margin-top: 4px;
+  cursor: pointer;
+  user-select: none;
+  transition: background .15s;
 }
+.sidebar-section-label:first-child { border-top: none; }
+.sidebar-section-label:hover { background: #e9ecef; }
+.sidebar-section-label .chevron {
+  font-size: 9px;
+  transition: transform .2s ease;
+  color: #6c757d;
+}
+.sidebar-section-label.collapsed .chevron { transform: rotate(-90deg); }
+
+/* sub-items wrapper — animated open/close */
+.sidebar-section-items {
+  overflow: hidden;
+  max-height: 600px;
+  transition: max-height .25s ease;
+}
+.sidebar-section-items.collapsed { max-height: 0; }
 
 #page-content-wrapper { min-width: 0; width: 100%; }
-
 #wrapper.toggled #sidebar-wrapper { margin-left: 0; }
 
 @media (min-width: 768px) {
@@ -90,7 +109,7 @@ code { font-family: "SF Mono","Fira Code",monospace; }
 .checklist li:last-child { border-bottom: none; }
 .checklist .tick { width: 16px; height: 16px; border: 1px solid #dee2e6; border-radius: 3px; flex-shrink: 0; margin-top: 2px; }
 
-/* ── Navbar active highlight ── */
+/* ── Active sidebar item ── */
 .sidebar-active { font-weight: 600; background: #e9ecef !important; color: #0d6efd !important; }
 
 /* ── Footer ── */

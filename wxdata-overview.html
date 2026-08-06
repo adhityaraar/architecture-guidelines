@@ -13,29 +13,42 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
       <div class="list-group list-group-flush">
-        <div class="sidebar-section-label">Db2 HADR</div>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">DataStage HA</div>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">watsonx.data</div>
-        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
-        <div class="sidebar-section-label">General</div>
-        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
-        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+
+        <div class="sidebar-section-label" data-section="general">General <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-general">
+          <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+          <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="db2">Db2 HADR <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-db2">
+          <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="ds">DataStage HA <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-ds">
+          <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="wx">watsonx.data <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-wx">
+          <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        </div>
+
       </div>
     </div>
   <div id="page-content-wrapper">
@@ -53,8 +66,7 @@
 <h1 class="text-wx">watsonx.data — HA &amp; DR Guide</h1>
 <p class="lead text-muted">High availability and disaster recovery for IBM watsonx.data lakehouse.</p>
 <hr/>
-<p>IBM watsonx.data is a hybrid, open lakehouse platform built on Apache Iceberg. Its HA design spans the <strong>query engine layer</strong> (Presto / Spark), the <strong>metadata catalog layer</strong> (Iceberg + Hive Metastore), and the <strong>object storage layer</strong> (S3-compatible or IBM COS).</p>
-
+<p>IBM watsonx.data is a hybrid, open lakehouse platform built on Apache Iceberg. Its HA design spans the <strong>query engine layer</strong> (Presto / Spark), the <strong>metadata catalog layer</strong> (Iceberg + HMS), and the <strong>object storage layer</strong> (S3 / IBM COS).</p>
 <h2>Goals &amp; Targets</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Goal</th><th>Target</th></tr></thead>
@@ -65,43 +77,30 @@
     <tr><td>Data availability</td><td>99.999% (multi-AZ COS buckets)</td></tr>
   </tbody>
 </table>
-
 <h2>Architecture Layers</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Layer</th><th>Component</th><th>HA Strategy</th></tr></thead>
   <tbody>
-    <tr><td><strong>Query Engine</strong></td><td>Presto coordinator + workers; Spark engine</td><td>Auto-restart on failure; stateless workers replaced automatically; coordinator is auto-recovered by platform operator</td></tr>
+    <tr><td><strong>Query Engine</strong></td><td>Presto coordinator + workers; Spark</td><td>Auto-restart; stateless workers replaced automatically by platform operator</td></tr>
     <tr><td><strong>Metastore Catalog</strong></td><td>Hive Metastore (HMS) or Iceberg REST catalog</td><td>Active/passive HA backed by replicated database (Db2 HADR or PostgreSQL Patroni)</td></tr>
-    <tr><td><strong>Object Storage</strong></td><td>IBM Cloud Object Storage / S3</td><td>Multi-AZ replication; Iceberg snapshots provide point-in-time recovery; no RPO concern for committed data</td></tr>
-    <tr><td><strong>Control Plane</strong></td><td>watsonx.data management console</td><td>Deployed on HA Kubernetes cluster (OpenShift multi-node); etcd and API server HA built-in</td></tr>
+    <tr><td><strong>Object Storage</strong></td><td>IBM COS / S3</td><td>Multi-AZ replication; Iceberg snapshots provide point-in-time recovery</td></tr>
+    <tr><td><strong>Control Plane</strong></td><td>watsonx.data management console</td><td>Deployed on HA OpenShift cluster; etcd and API server HA built-in</td></tr>
   </tbody>
 </table>
-
-<h2>Network Requirements</h2>
-<table class="table table-bordered table-sm">
-  <thead><tr><th>Interface</th><th>Requirement</th></tr></thead>
-  <tbody>
-    <tr><td>Engine ↔ COS</td><td>High-throughput (≥ 10 GbE); dedicated if possible</td></tr>
-    <tr><td>Engine ↔ Metastore</td><td>Low-latency LAN; bind to specific IPs — not 0.0.0.0</td></tr>
-    <tr><td>TLS</td><td>TLS 1.2+ on all interfaces; TLS 1.3 preferred for COS and API endpoints</td></tr>
-  </tbody>
-</table>
-
 <h2>Key HA Checks</h2>
 <ul class="checklist">
-  <li><span class="tick"></span>Presto/Spark engines deployed with auto-restart policy in operator config</li>
+  <li><span class="tick"></span>Presto/Spark engines deployed with auto-restart policy</li>
   <li><span class="tick"></span>Hive Metastore backed by HA database (Db2 HADR SYNC or PostgreSQL Patroni)</li>
   <li><span class="tick"></span>COS buckets configured with multi-AZ replication enabled</li>
   <li><span class="tick"></span>Iceberg table maintenance jobs scheduled (expire snapshots, remove orphan files)</li>
   <li><span class="tick"></span>Control plane deployed on multi-node OpenShift with etcd quorum &ge; 3 nodes</li>
   <li><span class="tick"></span>Engine restart tested and RTO measured</li>
-  <li><span class="tick"></span>Metastore failover tested end-to-end (query resumption after failover)</li>
-  <li><span class="tick"></span>Monitoring alerts configured for engine health, metastore connectivity, COS availability</li>
+  <li><span class="tick"></span>Metastore failover tested end-to-end</li>
+  <li><span class="tick"></span>Monitoring alerts configured for engine health, metastore, COS availability</li>
 </ul>
-
 <div class="callout">
   <strong>Iceberg Snapshot Safety Net</strong>
-  Every write to an Iceberg table creates an immutable snapshot. Even if the latest snapshot is corrupted or accidentally overwritten, previous snapshots remain accessible and queryable — providing built-in point-in-time recovery without additional backup tooling.
+  Every write to an Iceberg table creates an immutable snapshot. Previous snapshots remain accessible for point-in-time recovery without additional backup tooling.
 </div>
 
     </div>

@@ -13,29 +13,42 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
       <div class="list-group list-group-flush">
-        <div class="sidebar-section-label">Db2 HADR</div>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">DataStage HA</div>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">watsonx.data</div>
-        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
-        <div class="sidebar-section-label">General</div>
-        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
-        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+
+        <div class="sidebar-section-label" data-section="general">General <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-general">
+          <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+          <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="db2">Db2 HADR <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-db2">
+          <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="ds">DataStage HA <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-ds">
+          <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="wx">watsonx.data <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-wx">
+          <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        </div>
+
       </div>
     </div>
   <div id="page-content-wrapper">
@@ -55,12 +68,12 @@
 <table class="table table-bordered table-sm">
   <thead><tr><th>Metric</th><th>Source</th><th>Alert Threshold</th></tr></thead>
   <tbody>
-    <tr><td>Conductor process health</td><td>OS process monitor / cluster agent</td><td>Alert on process down &gt; 30 s</td></tr>
-    <tr><td>Worker availability</td><td>DataStage Director / REST API</td><td>Alert if available workers &lt; N (minimum for SLA)</td></tr>
-    <tr><td>Job run failures</td><td>DataStage log / Director run history</td><td>Alert on 3 consecutive failures of same job</td></tr>
-    <tr><td>Repository DB health</td><td>MON_GET_HADR (Db2) / Patroni API</td><td>Alert on HADR state ≠ PEER or Patroni leader unavailable</td></tr>
-    <tr><td>Shared filesystem</td><td>df / NFS mount health check</td><td>Alert on mount unavailable or &gt; 85% full</td></tr>
-    <tr><td>Queue depth (scheduled jobs)</td><td>DataStage schedule monitor</td><td>Alert if scheduled jobs delayed &gt; SLA window</td></tr>
+    <tr><td>Conductor process health</td><td>OS process monitor / cluster agent</td><td>Process down &gt; 30 s</td></tr>
+    <tr><td>Worker availability</td><td>DataStage Director / REST API</td><td>Available workers &lt; N (minimum for SLA)</td></tr>
+    <tr><td>Job run failures</td><td>Director run history</td><td>3 consecutive failures of same job</td></tr>
+    <tr><td>Repository DB health</td><td>MON_GET_HADR (Db2) / Patroni API</td><td>HADR state &ne; PEER or Patroni leader unavailable</td></tr>
+    <tr><td>Shared filesystem</td><td>df / NFS mount health</td><td>Mount unavailable or &gt; 85% full</td></tr>
+    <tr><td>Scheduled job queue</td><td>DataStage schedule monitor</td><td>Jobs delayed &gt; SLA window</td></tr>
   </tbody>
 </table>
 

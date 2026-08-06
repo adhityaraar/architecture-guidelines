@@ -13,29 +13,42 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
       <div class="list-group list-group-flush">
-        <div class="sidebar-section-label">Db2 HADR</div>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">DataStage HA</div>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">watsonx.data</div>
-        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
-        <div class="sidebar-section-label">General</div>
-        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
-        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+
+        <div class="sidebar-section-label" data-section="general">General <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-general">
+          <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+          <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="db2">Db2 HADR <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-db2">
+          <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="ds">DataStage HA <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-ds">
+          <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="wx">watsonx.data <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-wx">
+          <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        </div>
+
       </div>
     </div>
   <div id="page-content-wrapper">
@@ -53,7 +66,6 @@
 <h1 class="text-db2">Reference Topologies</h1>
 <p class="lead text-muted">Choose the right topology based on DC count, RPO, and RTO requirements.</p>
 <hr/>
-
 <h2>3.1 Single Standby — HA Within DC</h2>
 <div class="diagram-wrap">
   <svg width="620" height="200" viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
@@ -82,7 +94,6 @@
     <text x="442" y="108" fill="#7c5cd8" font-size="11">Log Ship</text>
   </svg>
 </div>
-
 <h2>3.2 Cross-Site HA + DR (Recommended for Tier 1)</h2>
 <div class="diagram-wrap">
   <svg width="620" height="230" viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
@@ -111,7 +122,6 @@
     <text x="280" y="88" text-anchor="middle" fill="#57606a" font-size="10">ASYNC (WAN)</text>
   </svg>
 </div>
-
 <h2>Topology Decision Matrix</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Scenario</th><th>Topology</th><th>Sync Mode</th><th>Standbys</th></tr></thead>

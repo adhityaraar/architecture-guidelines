@@ -13,29 +13,42 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
       <div class="sidebar-heading">IBM HA &amp; DR Wiki</div>
       <div class="list-group list-group-flush">
-        <div class="sidebar-section-label">Db2 HADR</div>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">DataStage HA</div>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
-        <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
-        <div class="sidebar-section-label">watsonx.data</div>
-        <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
-        <div class="sidebar-section-label">General</div>
-        <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
-        <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+
+        <div class="sidebar-section-label" data-section="general">General <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-general">
+          <a class="list-group-item list-group-item-action bg-light" href="general-principles.html">HA &amp; DR Principles</a>
+          <a class="list-group-item list-group-item-action bg-light" href="general-licensing.html">IBM Licensing Guide</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="db2">Db2 HADR <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-db2">
+          <a class="list-group-item list-group-item-action bg-light" href="db2-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-topology.html">Reference Topologies</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-sync.html">Sync Modes</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-network.html">Network &amp; Storage</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-config.html">Configuration</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-acr.html">Client Reroute (ACR)</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-failover.html">Failover Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="db2-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="ds">DataStage HA <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-ds">
+          <a class="list-group-item list-group-item-action bg-light" href="ds-overview.html">Overview</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-topology.html">HA Topology</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-engine.html">Parallel Engine Resilience</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-repo.html">Repository &amp; Metadata HA</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-monitoring.html">Monitoring &amp; Alerting</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-recovery.html">Recovery Procedures</a>
+          <a class="list-group-item list-group-item-action bg-light" href="ds-checklist.html">Pre-Production Checklist</a>
+        </div>
+
+        <div class="sidebar-section-label collapsed" data-section="wx">watsonx.data <span class="chevron">&#9660;</span></div>
+        <div class="sidebar-section-items collapsed" id="section-wx">
+          <a class="list-group-item list-group-item-action bg-light" href="wxdata-overview.html">Overview &amp; HA Guide</a>
+        </div>
+
       </div>
     </div>
   <div id="page-content-wrapper">
@@ -53,7 +66,6 @@
 <h1>HA &amp; DR Principles</h1>
 <p class="lead text-muted">Cross-product standards applicable to all IBM HA and DR deployments.</p>
 <hr/>
-
 <h2>Core Principles</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Principle</th><th>Definition</th></tr></thead>
@@ -66,38 +78,29 @@
     <tr><td><strong>Minimal blast radius</strong></td><td>Design so a failure affects only the smallest possible scope of users/services.</td></tr>
   </tbody>
 </table>
-
 <h2>RPO / RTO Framework</h2>
 <div class="diagram-wrap">
-  <svg width="620" height="130" viewBox="0 0 620 130" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
+  <svg width="600" height="130" viewBox="0 0 600 130" xmlns="http://www.w3.org/2000/svg" font-family="-apple-system,Segoe UI,sans-serif" font-size="12">
     <defs>
       <marker id="ga" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#57606a"/></marker>
       <marker id="gb" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#0d6efd"/></marker>
       <marker id="gc" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#dc3545"/></marker>
     </defs>
-    <line x1="30" y1="70" x2="600" y2="70" stroke="#dee2e6" stroke-width="2" marker-end="url(#ga)"/>
-    <line x1="150" y1="50" x2="150" y2="90" stroke="#0d6efd" stroke-width="2"/>
-    <text x="150" y="42" text-anchor="middle" fill="#0d6efd" font-size="11">Last good state</text>
-    <line x1="330" y1="50" x2="330" y2="90" stroke="#dc3545" stroke-width="2"/>
-    <text x="330" y="42" text-anchor="middle" fill="#dc3545" font-size="11">Failure</text>
-    <line x1="510" y1="50" x2="510" y2="90" stroke="#0f7b5e" stroke-width="2"/>
-    <text x="510" y="42" text-anchor="middle" fill="#0f7b5e" font-size="11">Recovery</text>
-    <line x1="150" y1="100" x2="330" y2="100" stroke="#0d6efd" stroke-width="1.5" marker-end="url(#gb)"/>
-    <line x1="330" y1="100" x2="150" y2="100" stroke="#0d6efd" stroke-width="1.5" marker-end="url(#gb)"/>
-    <text x="240" y="116" text-anchor="middle" fill="#0d6efd" font-weight="600" font-size="12">RPO</text>
-    <line x1="330" y1="115" x2="510" y2="115" stroke="#dc3545" stroke-width="1.5" marker-end="url(#gc)"/>
-    <line x1="510" y1="115" x2="330" y2="115" stroke="#dc3545" stroke-width="1.5" marker-end="url(#gc)"/>
-    <text x="420" y="128" text-anchor="middle" fill="#dc3545" font-weight="600" font-size="12">RTO</text>
+    <line x1="30" y1="70" x2="580" y2="70" stroke="#dee2e6" stroke-width="2" marker-end="url(#ga)"/>
+    <line x1="140" y1="50" x2="140" y2="90" stroke="#0d6efd" stroke-width="2"/>
+    <text x="140" y="42" text-anchor="middle" fill="#0d6efd" font-size="11">Last good state</text>
+    <line x1="310" y1="50" x2="310" y2="90" stroke="#dc3545" stroke-width="2"/>
+    <text x="310" y="42" text-anchor="middle" fill="#dc3545" font-size="11">Failure</text>
+    <line x1="490" y1="50" x2="490" y2="90" stroke="#0f7b5e" stroke-width="2"/>
+    <text x="490" y="42" text-anchor="middle" fill="#0f7b5e" font-size="11">Recovery</text>
+    <line x1="140" y1="100" x2="310" y2="100" stroke="#0d6efd" stroke-width="1.5" marker-end="url(#gb)"/>
+    <line x1="310" y1="100" x2="140" y2="100" stroke="#0d6efd" stroke-width="1.5" marker-end="url(#gb)"/>
+    <text x="225" y="116" text-anchor="middle" fill="#0d6efd" font-weight="600">RPO</text>
+    <line x1="310" y1="115" x2="490" y2="115" stroke="#dc3545" stroke-width="1.5" marker-end="url(#gc)"/>
+    <line x1="490" y1="115" x2="310" y2="115" stroke="#dc3545" stroke-width="1.5" marker-end="url(#gc)"/>
+    <text x="400" y="128" text-anchor="middle" fill="#dc3545" font-weight="600">RTO</text>
   </svg>
 </div>
-<table class="table table-bordered table-sm">
-  <thead><tr><th>Metric</th><th>Question it Answers</th><th>Drives</th></tr></thead>
-  <tbody>
-    <tr><td><strong>RPO</strong></td><td>"How much data can we afford to lose?"</td><td>Replication mode, backup frequency</td></tr>
-    <tr><td><strong>RTO</strong></td><td>"How long can the service be down?"</td><td>Automation level, standby warm/cold, runbook speed</td></tr>
-  </tbody>
-</table>
-
 <h2>Application Tier Classification</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Tier</th><th>Examples</th><th>Max RPO</th><th>Max RTO</th><th>Failover</th></tr></thead>
@@ -108,14 +111,13 @@
     <tr><td><strong>Tier 4 — Non-Critical</strong></td><td>Dev/test, analytics sandboxes</td><td>24 h</td><td>4 h</td><td>Manual / none</td></tr>
   </tbody>
 </table>
-
 <h2>Cross-Cutting Security Standards</h2>
 <table class="table table-bordered table-sm">
   <thead><tr><th>Control</th><th>Requirement</th></tr></thead>
   <tbody>
     <tr><td>Replication traffic encryption</td><td>TLS 1.2 minimum (TLS 1.3 preferred) for all replication links crossing untrusted networks</td></tr>
     <tr><td>Service binding</td><td>Bind all services to specific IPs — never 0.0.0.0</td></tr>
-    <tr><td>Credentials</td><td>No hardcoded passwords; use environment variables or IBM Key Protect / HashiCorp Vault</td></tr>
+    <tr><td>Credentials</td><td>No hardcoded passwords; use IBM Key Protect or HashiCorp Vault</td></tr>
     <tr><td>Least privilege</td><td>HA admin roles scoped to minimum required permissions; review quarterly</td></tr>
     <tr><td>Audit logging</td><td>Log all failover, takeover, and administrative actions; retain &ge; 90 days</td></tr>
     <tr><td>Container images</td><td>Source from registry.redhat.io only; non-root execution mandatory</td></tr>
