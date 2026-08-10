@@ -132,6 +132,38 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
   border-top: 1px solid #f0f0f0;
 }
 
+.snav-category-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.38rem 1rem 0.38rem 2.05rem;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #4b5563;
+  background: #fafbfc;
+  border-top: 1px solid #edf0f3;
+  cursor: pointer;
+  user-select: none;
+  transition: background .12s, color .12s;
+}
+.snav-category-row:hover,
+.snav-category-row.open {
+  background: #eef6f2;
+  color: #0f7b5e;
+}
+.snav-category-row.open .snav-chevron { transform: rotate(90deg); }
+.snav-category-pages {
+  overflow: hidden;
+  height: 0;
+  transition: height .2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+#sidebar-wrapper .snav-category-pages .list-group-item {
+  padding-left: 3rem !important;
+  font-size: 12.5px;
+  background: #fff !important;
+  border-top: 1px solid #f5f6f8;
+}
+
 #page-content-wrapper { min-width: 0; width: 100%; }
 #wrapper.toggled #sidebar-wrapper { margin-left: 0; }
 

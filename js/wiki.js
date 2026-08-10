@@ -14,8 +14,6 @@
   // Figures out how many levels deep this page is from architecture/
   // so all asset paths resolve correctly from any sub-page.
   var _path   = window.location.pathname;
-  // Number of '/' segments below the architecture/ root
-  var _depth  = (_path.match(/\//g) || []).length - 1;
   // Find the architecture root by walking up
   var _parts  = _path.split('/').filter(Boolean);
   var _rootIdx = -1;
@@ -23,7 +21,9 @@
     if (_parts[_i] === 'architecture') { _rootIdx = _i; break; }
   }
   // prefix = number of '../' needed to reach architecture/
-  var _levelsBelow = _rootIdx >= 0 ? (_parts.length - 1 - _rootIdx) : 0;
+  var _lastPart = _parts[_parts.length - 1] || '';
+  var _currentDirParts = /\.[^/]+$/.test(_lastPart) ? _parts.slice(0, -1) : _parts;
+  var _levelsBelow = _rootIdx >= 0 ? Math.max(0, _currentDirParts.length - 1 - _rootIdx) : 0;
   var ROOT = '';
   for (var _j = 0; _j < _levelsBelow; _j++) ROOT += '../';
   // ROOT is now '' for index.html, '../' for depth-1, '../../' for depth-2 etc.
@@ -83,6 +83,40 @@
   var _input      = document.getElementById('global-search');
   var _clear      = document.getElementById('global-search-clear');
   var _drop       = document.getElementById('search-results-dropdown');
+  var _EXTRA_SEARCH_ENTRIES = [
+    {
+      label: 'DB2 Must Gather Commands',
+      tab: 'tab-db2',
+      tabLabel: 'DB2',
+      badgeColor: '#7c5cd8',
+      badgeBg: '#ede9fb',
+      headings: ['DB2 Must Gather Commands', 'Before you run', 'Command purpose', 'Collection commands', 'After collection'],
+      body: 'DB2 must gather commands top db2pd -eve db2pd -stack all db2mon db2support database diagnostic collection package',
+      db2page: 'db2/db2MustGather.html'
+    }
+  ];
+
+  function _mergeExtraSearchEntries(index) {
+    if (!index) index = [];
+    var legacyDb2Pages = ['db2/db2Snapshot.html', 'db2/mustGatherHighCpu.html'];
+    for (var i = index.length - 1; i >= 0; i--) {
+      var item = index[i] || {};
+      if (legacyDb2Pages.indexOf(item.db2page) >= 0 ||
+          legacyDb2Pages.indexOf(item.href) >= 0 ||
+          item.label === 'DB2 Snapshot Command') {
+        index.splice(i, 1);
+      }
+    }
+    _EXTRA_SEARCH_ENTRIES.forEach(function (entry) {
+      var exists = index.some(function (item) {
+        return item.db2page === entry.db2page || item.href === entry.db2page || item.label === entry.label;
+      });
+      if (!exists) index.push(entry);
+    });
+    return index;
+  }
+
+  if (window.__SEARCH_INDEX) window.__SEARCH_INDEX = _mergeExtraSearchEntries(window.__SEARCH_INDEX);
 
   function _buildSidebarIndex() {
     // Fallback: build a minimal index from sidebar links on the current page
@@ -110,15 +144,15 @@
     if (_idxLoaded) { cb(); return; }
     // Use inline index if available (injected by build script, works on file://)
     if (window.__SEARCH_INDEX) {
-      _INDEX = window.__SEARCH_INDEX; _idxLoaded = true; cb(); return;
+      _INDEX = _mergeExtraSearchEntries(window.__SEARCH_INDEX); _idxLoaded = true; cb(); return;
     }
     if (_drop) { _drop.innerHTML = '<div class="sr-empty">Loading\u2026</div>'; _drop.classList.add('open'); }
     fetch(ROOT + 'search-index.json')
       .then(function (r) { return r.json(); })
-      .then(function (data) { _INDEX = data; _idxLoaded = true; cb(); })
+      .then(function (data) { _INDEX = _mergeExtraSearchEntries(data); _idxLoaded = true; cb(); })
       .catch(function () {
         // fetch failed (e.g. file:// protocol) — fall back to sidebar links
-        _INDEX = _buildSidebarIndex();
+        _INDEX = _mergeExtraSearchEntries(_buildSidebarIndex());
         _idxLoaded = true;
         cb();
       });
@@ -222,8 +256,8 @@
           var sideLink = document.querySelector('.db2-nav-link[data-db2page="' + db2page + '"]');
           db2LoadPage(db2page, sideLink);
         } else if (db2page) {
-          // We're on a sub-page — navigate to index with hash
-          window.location.href = ROOT + 'index.html#tab-db2';
+          // DB2 pages are standalone, so open the matched page directly.
+          window.location.href = ROOT + db2page;
         } else if (href) {
           window.location.href = href;
         }
@@ -255,7 +289,174 @@
     if (wrap && !wrap.contains(e.target) && _drop) _drop.classList.remove('open');
   });
 
-  // ── 3. Toggle sidebar ─────────────────────────────────────────────────
+  // ── 3. Group DB2 sidebar links into categories ───────────────────────
+  function _categorizeDb2Sidebar() {
+    var section = document.getElementById('section-db2');
+    if (!section || section.getAttribute('data-db2-categorized') === 'true') return;
+
+    var directLinks = Array.from(section.children).filter(function (node) {
+      return node.tagName === 'A' && node.classList.contains('list-group-item');
+    });
+    if (!directLinks.length) return;
+
+    var byFile = {};
+    directLinks.forEach(function (link) {
+      var href = link.getAttribute('href') || '';
+      var file = href.split('#')[0].split('?')[0].split('/').pop();
+      if (file) byFile[file] = link;
+    });
+
+    var knownDb2Pages = {
+      'db2MustGather.html': 'DB2 Must Gather Commands'
+    };
+    Object.keys(knownDb2Pages).forEach(function (file) {
+      if (byFile[file]) return;
+      var link = document.createElement('a');
+      link.className = 'list-group-item list-group-item-action bg-light';
+      link.href = ROOT + 'db2/' + file;
+      link.textContent = knownDb2Pages[file];
+      byFile[file] = link;
+    });
+
+    var categories = [
+      {
+        id: 'db2-start',
+        label: 'Getting Started',
+        files: ['hadrBenefits.html', 'featureHistory.html', 'hadrTutorial.html', 'hadrPerf.html', 'hadrPureScale.html', 'faq.html', 'sizing.html']
+      },
+      {
+        id: 'db2-config',
+        label: 'Configuration & Tuning',
+        files: ['hadrConfig.html', 'hadrSyncMode.html', 'tcpTuning.html', 'perfTuning.html']
+      },
+      {
+        id: 'db2-ops',
+        label: 'Operations & Automation',
+        files: ['hadrTakeover.html', 'hadrLogShipping.html', 'hadrCommands.html', 'hadrMonitoring.html', 'clusterManagers.html', 'clientReroute.html']
+      },
+      {
+        id: 'db2-tools',
+        label: 'Simulators & Tools',
+        files: ['hadrSimulator.html', 'simulatorOptions.html', 'simulatorOutput.html', 'simulatorParams.html', 'db2logscan.html', 'db2fmtlog.html']
+      },
+      {
+        id: 'db2-diag',
+        label: 'Diagnostics',
+        files: ['diagConnect.html', 'db2diag.html', 'db2MustGather.html']
+      }
+    ];
+
+    section.innerHTML = '';
+    section.setAttribute('data-db2-categorized', 'true');
+
+    if (byFile['index.html']) section.appendChild(byFile['index.html']);
+
+    categories.forEach(function (category) {
+      var pages = document.createElement('div');
+      pages.className = 'snav-product-pages collapsed';
+      pages.id = 'snav-' + category.id;
+
+      category.files.forEach(function (file) {
+        if (byFile[file]) pages.appendChild(byFile[file]);
+      });
+      if (!pages.children.length) return;
+
+      var row = document.createElement('div');
+      row.className = 'snav-product-row';
+      row.setAttribute('data-snav', category.id);
+      row.appendChild(document.createTextNode(category.label + ' '));
+
+      var chevron = document.createElement('span');
+      chevron.className = 'snav-chevron';
+      chevron.innerHTML = '&#9656;';
+      row.appendChild(chevron);
+
+      section.appendChild(row);
+      section.appendChild(pages);
+    });
+  }
+
+  _categorizeDb2Sidebar();
+
+  // ── 4. Group InfoSphere product links into nested categories ─────────
+  function _categorizeInfosphereSidebar() {
+    var section = document.getElementById('section-ds');
+    if (!section || section.getAttribute('data-infosphere-categorized') === 'true') return;
+
+    var products = [
+      {
+        nav: 'ds-datastage',
+        categories: [
+          { id: 'ds-architecture', label: 'Architecture', files: ['ds-overview.html', 'ds-topology.html'] },
+          { id: 'ds-resilience', label: 'Runtime & Metadata', files: ['ds-engine.html', 'ds-repo.html'] },
+          { id: 'ds-operations', label: 'Operations', files: ['ds-monitoring.html', 'ds-recovery.html'] },
+          { id: 'ds-readiness', label: 'Readiness', files: ['ds-checklist.html'] }
+        ]
+      },
+      {
+        nav: 'ds-cdc',
+        categories: [
+          { id: 'cdc-architecture', label: 'Architecture', files: ['cdc-overview.html', 'cdc-topology.html'] },
+          { id: 'cdc-replication', label: 'Replication Design', files: ['cdc-subscriptions.html'] },
+          { id: 'cdc-operations', label: 'Operations', files: ['cdc-monitoring.html', 'cdc-recovery.html'] },
+          { id: 'cdc-readiness', label: 'Readiness', files: ['cdc-checklist.html'] }
+        ]
+      }
+    ];
+
+    products.forEach(function (product) {
+      var row = section.querySelector('.snav-product-row[data-snav="' + product.nav + '"]');
+      if (!row || !row.nextElementSibling) return;
+
+      var productPages = row.nextElementSibling;
+      if (productPages.getAttribute('data-product-categorized') === 'true') return;
+
+      var directLinks = Array.from(productPages.children).filter(function (node) {
+        return node.tagName === 'A' && node.classList.contains('list-group-item');
+      });
+      if (!directLinks.length) return;
+
+      var byFile = {};
+      directLinks.forEach(function (link) {
+        var href = link.getAttribute('href') || '';
+        var file = href.split('#')[0].split('?')[0].split('/').pop();
+        if (file) byFile[file] = link;
+      });
+
+      productPages.innerHTML = '';
+      productPages.setAttribute('data-product-categorized', 'true');
+
+      product.categories.forEach(function (category) {
+        var categoryPages = document.createElement('div');
+        categoryPages.className = 'snav-category-pages collapsed';
+        categoryPages.id = 'snav-' + category.id;
+
+        category.files.forEach(function (file) {
+          if (byFile[file]) categoryPages.appendChild(byFile[file]);
+        });
+        if (!categoryPages.children.length) return;
+
+        var categoryRow = document.createElement('div');
+        categoryRow.className = 'snav-category-row';
+        categoryRow.setAttribute('data-snav-category', category.id);
+        categoryRow.appendChild(document.createTextNode(category.label + ' '));
+
+        var chevron = document.createElement('span');
+        chevron.className = 'snav-chevron';
+        chevron.innerHTML = '&#9656;';
+        categoryRow.appendChild(chevron);
+
+        productPages.appendChild(categoryRow);
+        productPages.appendChild(categoryPages);
+      });
+    });
+
+    section.setAttribute('data-infosphere-categorized', 'true');
+  }
+
+  _categorizeInfosphereSidebar();
+
+  // ── 5. Toggle sidebar ─────────────────────────────────────────────────
   if (!window.__menuToggleRegistered) {
     var _mt = document.getElementById('menu-toggle');
     if (_mt) _mt.addEventListener('click', function () {
@@ -263,7 +464,7 @@
     });
   }
 
-  // ── 4. Highlight current page & auto-expand its section ──────────────
+  // ── 6. Highlight current page & auto-expand its section ──────────────
   (function () {
     var fullPath = window.location.pathname;
     var page = fullPath.split('/').pop() || 'index.html';
@@ -288,6 +489,12 @@
       if (label) label.classList.remove('collapsed');
 
       var snavPages = a.closest('.snav-product-pages');
+      var snavCategoryPages = a.closest('.snav-category-pages');
+      if (snavCategoryPages) {
+        snavCategoryPages.style.height = 'auto';
+        var snavCategoryRow = snavCategoryPages.previousElementSibling;
+        if (snavCategoryRow && snavCategoryRow.classList.contains('snav-category-row')) snavCategoryRow.classList.add('open');
+      }
       if (snavPages) {
         snavPages.style.height = 'auto';
         var snavRow = snavPages.previousElementSibling;
@@ -296,40 +503,82 @@
     });
   })();
 
-  // ── 5. Snav sub-product accordion (InfoSphere, watsonx.data, Guardium) ──
-  document.querySelectorAll('.snav-product-row').forEach(function (row) {
-    row.addEventListener('click', function () {
-      var pages   = row.nextElementSibling; // .snav-product-pages
-      var isOpen  = row.classList.contains('open');
-      var section = row.closest('.sidebar-section-items');
+  // ── 7. Snav sub-product accordion ────────────────────────────────────
+  if (!window.__snavAccordionRegistered) {
+    window.__snavAccordionRegistered = true;
+    document.querySelectorAll('.snav-product-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var pages   = row.nextElementSibling; // .snav-product-pages
+        var isOpen  = row.classList.contains('open');
+        var section = row.closest('.sidebar-section-items');
 
-      // Collapse any other open sibling in the same section
-      section.querySelectorAll('.snav-product-row.open').forEach(function (other) {
-        if (other === row) return;
-        other.classList.remove('open');
-        var op = other.nextElementSibling;
-        op.style.height = op.getBoundingClientRect().height + 'px';
-        requestAnimationFrame(function () { requestAnimationFrame(function () { op.style.height = '0'; }); });
-      });
-
-      if (isOpen) {
-        row.classList.remove('open');
-        pages.style.height = pages.getBoundingClientRect().height + 'px';
-        requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = '0'; }); });
-      } else {
-        row.classList.add('open');
-        pages.style.height = '0';
-        var target = pages.scrollHeight + 'px';
-        requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = target; }); });
-        pages.addEventListener('transitionend', function once() {
-          pages.removeEventListener('transitionend', once);
-          if (row.classList.contains('open')) pages.style.height = 'auto';
+        // Collapse any other open sibling in the same section
+        section.querySelectorAll('.snav-product-row.open').forEach(function (other) {
+          if (other === row) return;
+          other.classList.remove('open');
+          var op = other.nextElementSibling;
+          op.style.height = op.getBoundingClientRect().height + 'px';
+          requestAnimationFrame(function () { requestAnimationFrame(function () { op.style.height = '0'; }); });
         });
-      }
-    });
-  });
 
-  // ── 6. Smooth accordion sidebar sections ─────────────────────────────
+        if (isOpen) {
+          row.classList.remove('open');
+          pages.style.height = pages.getBoundingClientRect().height + 'px';
+          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = '0'; }); });
+        } else {
+          row.classList.add('open');
+          pages.style.height = '0';
+          var target = pages.scrollHeight + 'px';
+          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = target; }); });
+          pages.addEventListener('transitionend', function once() {
+            pages.removeEventListener('transitionend', once);
+            if (row.classList.contains('open')) pages.style.height = 'auto';
+          });
+        }
+      });
+    });
+  }
+
+  // ── 8. Snav nested category accordion ────────────────────────────────
+  if (!window.__snavCategoryAccordionRegistered) {
+    window.__snavCategoryAccordionRegistered = true;
+    document.querySelectorAll('.snav-category-row').forEach(function (row) {
+      row.addEventListener('click', function () {
+        var pages = row.nextElementSibling; // .snav-category-pages
+        var isOpen = row.classList.contains('open');
+        var productPages = row.closest('.snav-product-pages');
+
+        Array.from(productPages.children).forEach(function (other) {
+          if (other === row || !other.classList || !other.classList.contains('snav-category-row') || !other.classList.contains('open')) return;
+          other.classList.remove('open');
+          var otherPages = other.nextElementSibling;
+          otherPages.style.height = otherPages.getBoundingClientRect().height + 'px';
+          requestAnimationFrame(function () { requestAnimationFrame(function () { otherPages.style.height = '0'; }); });
+        });
+
+        if (isOpen) {
+          row.classList.remove('open');
+          pages.style.height = pages.getBoundingClientRect().height + 'px';
+          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = '0'; }); });
+        } else {
+          row.classList.add('open');
+          pages.style.height = '0';
+          var target = pages.scrollHeight + 'px';
+          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = target; }); });
+          pages.addEventListener('transitionend', function once() {
+            pages.removeEventListener('transitionend', once);
+            if (row.classList.contains('open')) pages.style.height = 'auto';
+          });
+        }
+
+        if (productPages && productPages.style.height !== 'auto') {
+          productPages.style.height = 'auto';
+        }
+      });
+    });
+  }
+
+  // ── 9. Smooth accordion sidebar sections ─────────────────────────────
   (function () {
     var labels = Array.from(document.querySelectorAll('.sidebar-section-label'));
 

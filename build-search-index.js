@@ -46,6 +46,7 @@ const PAGES = [
   { label:'db2logscan',                file:'db2/db2logscan.html',      tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/db2logscan.html' },
   { label:'Diag Connect',              file:'db2/diagConnect.html',     tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/diagConnect.html' },
   { label:'db2diag.log',               file:'db2/db2diag.html',         tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/db2diag.html' },
+  { label:'DB2 Must Gather Commands',  file:'db2/db2MustGather.html',    tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/db2MustGather.html' },
   { label:'db2fmtlog replayonlywindow',file:'db2/db2fmtlog.html',       tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/db2fmtlog.html' },
   { label:'FAQ',                       file:'db2/faq.html',             tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/faq.html' },
   { label:'Sizing',                    file:'db2/sizing.html',          tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/sizing.html' },
