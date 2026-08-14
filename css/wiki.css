@@ -1,5 +1,51 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+
 /* ── Simple Sidebar (adapted from Start Bootstrap MIT) ── */
-body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-serif; }
+:root {
+  --wiki-font-sans: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --wiki-font-mono: "IBM Plex Mono", "SF Mono", "Fira Code", Consolas, monospace;
+  --wiki-text: #212529;
+}
+
+body {
+  overflow-x: hidden;
+  color: var(--wiki-text);
+  font-family: var(--wiki-font-sans);
+}
+
+button,
+input,
+select,
+textarea,
+table,
+.navbar,
+.list-group-item {
+  font-family: var(--wiki-font-sans);
+}
+
+#menu-toggle.sidebar-toggle-icon {
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  color: #343a40;
+  font-size: 22px;
+  line-height: 1;
+  font-weight: 600;
+}
+#menu-toggle.sidebar-toggle-icon:hover,
+#menu-toggle.sidebar-toggle-icon:focus {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #0d6efd;
+  box-shadow: none !important;
+}
 
 #sidebar-wrapper {
   min-height: 100vh;
@@ -20,6 +66,38 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
 #sidebar-wrapper .sidebar-heading:hover {
   background: #2d333b !important;
   text-decoration: none;
+}
+.sidebar-header-row {
+  display: flex;
+  align-items: stretch;
+  background: #1f2328;
+  border-bottom: 2px solid #7c5cd8;
+}
+.sidebar-header-row .sidebar-heading {
+  min-width: 0;
+  flex: 1;
+  border-bottom: 0 !important;
+  padding-right: 0.35rem !important;
+}
+.sidebar-expand-toggle {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #c9d1d9;
+  font-size: 19px;
+  line-height: 1;
+  cursor: pointer;
+}
+.sidebar-expand-toggle:hover,
+.sidebar-expand-toggle:focus {
+  background: #2d333b;
+  color: #fff;
+  outline: none;
+}
+.sidebar-expand-toggle:focus-visible {
+  box-shadow: inset 0 0 0 2px #7c5cd8;
 }
 #sidebar-wrapper .sidebar-heading .sh-avatar {
   width: 32px;
@@ -163,6 +241,12 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
   background: #fff !important;
   border-top: 1px solid #f5f6f8;
 }
+.snav-wip {
+  display: block;
+  color: #7a828a;
+  cursor: default;
+  font-style: italic;
+}
 
 #page-content-wrapper { min-width: 0; width: 100%; }
 #wrapper.toggled #sidebar-wrapper { margin-left: 0; }
@@ -182,6 +266,10 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
 .text-gdp    { color: #b91c1c !important; }
 .text-gdc    { color: #be185d !important; }
 .text-gcm    { color: #6d28d9 !important; }
+.text-optim  { color: #525252 !important; }
+.text-mdm    { color: #0f766e !important; }
+.text-oem    { color: #4b5563 !important; }
+.text-general{ color: #343a40 !important; }
 
 .border-db2   { border-top: 3px solid #7c5cd8 !important; }
 .border-ds    { border-top: 3px solid #0f7b5e !important; }
@@ -192,6 +280,10 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
 .border-gdp   { border-top: 3px solid #b91c1c !important; }
 .border-gdc   { border-top: 3px solid #be185d !important; }
 .border-gcm   { border-top: 3px solid #6d28d9 !important; }
+.border-optim { border-top: 3px solid #525252 !important; }
+.border-mdm   { border-top: 3px solid #0f766e !important; }
+.border-oem   { border-top: 3px solid #4b5563 !important; }
+.border-general { border-top: 3px solid #343a40 !important; }
 
 .btn-db2   { background: #7c5cd8; color: #fff; border: none; }
 .btn-db2:hover   { background: #6748c0; color: #fff; }
@@ -211,16 +303,86 @@ body { overflow-x: hidden; font-family: -apple-system,"Segoe UI",system-ui,sans-
 .btn-gdc:hover   { background: #9d174d; color: #fff; }
 .btn-gcm   { background: #6d28d9; color: #fff; border: none; }
 .btn-gcm:hover   { background: #5b21b6; color: #fff; }
+.btn-optim { background: #525252; color: #fff; border: none; }
+.btn-optim:hover { background: #3f3f46; color: #fff; }
+.btn-mdm { background: #0f766e; color: #fff; border: none; }
+.btn-mdm:hover { background: #115e59; color: #fff; }
+.btn-oem { background: #4b5563; color: #fff; border: none; }
+.btn-oem:hover { background: #374151; color: #fff; }
+.btn-general { background: #343a40; color: #fff; border: none; }
+.btn-general:hover { background: #1f2328; color: #fff; }
+
+/* Keep dashboard action buttons aligned across each product row. */
+#tab-home .card.h-100 {
+  min-height: 194px;
+}
+
+#tab-home .card.h-100 .card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+#tab-home .card.h-100 .card-text {
+  margin-bottom: 18px;
+}
+
+#tab-home .card.h-100 .btn {
+  margin-top: auto;
+  min-width: 96px;
+}
 
 /* ── Page content ── */
-h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: .25rem; }
+#page-content-wrapper,
+#page-content-wrapper * {
+  font-family: var(--wiki-font-sans) !important;
+}
+
+#page-content-wrapper h1,
+#page-content-wrapper h1[class*="text-"],
+#page-content-wrapper .container-fluid > h1 {
+  color: var(--wiki-text) !important;
+  font-size: 1.8rem !important;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left !important;
+  margin-bottom: .25rem;
+}
+
+#page-content-wrapper h1 a {
+  color: inherit;
+}
+
 h2 { font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid #dee2e6; padding-bottom: .4rem; margin: 1.8rem 0 .8rem; }
 h3 { font-size: 1rem; font-weight: 600; margin: 1.2rem 0 .5rem; }
-p  { font-size: 14px; line-height: 1.65; }
+p,
+.lead {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.lead {
+  color: var(--wiki-text) !important;
+  font-size: 14px !important;
+  font-weight: 400 !important;
+  line-height: 1.65 !important;
+  text-align: left !important;
+}
+
 table { font-size: 13px; }
 th { background: #f8f9fa; }
 pre { background: #1f2328; color: #e6edf3; border-radius: 4px; padding: 14px; font-size: 12px; line-height: 1.55; overflow-x: auto; }
-code { font-family: "SF Mono","Fira Code",monospace; }
+pre,
+pre *,
+code,
+code *,
+kbd,
+samp,
+.quick-ref-card .cmd,
+span[style*="courier"] {
+  font-family: var(--wiki-font-mono) !important;
+}
 
 /* ── Callouts ── */
 .callout { border-left: 4px solid #0d6efd; background: #f0f5ff; padding: 12px 16px; border-radius: 0 4px 4px 0; margin: 14px 0; font-size: 13px; }
@@ -233,6 +395,13 @@ code { font-family: "SF Mono","Fira Code",monospace; }
 .diagram-wrap { border: 1px solid #dee2e6; border-radius: 4px; background: #f8f9fa; padding: 20px 12px; margin: 14px 0; overflow-x: auto; }
 .diagram-wrap svg { display: block; margin: 0 auto; }
 
+/* ── Source figures ── */
+.source-figure { border: 1px solid #dee2e6; border-radius: 4px; background: #fff; padding: 12px; margin: 18px 0; }
+.source-figure img { display: block; width: auto; max-width: 100%; height: auto; margin: 0 auto; }
+.source-figure figcaption { color: #5f6872; font-size: 12px; line-height: 1.5; margin-top: 10px; }
+.source-note { border-top: 1px solid #dee2e6; color: #5f6872; font-size: 12px; line-height: 1.6; margin-top: 28px; padding-top: 12px; }
+.source-note a { overflow-wrap: anywhere; }
+
 /* ── Checklist ── */
 .checklist { list-style: none; padding: 0; }
 .checklist li { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 13px; border-bottom: 1px solid #f0f0f0; }
@@ -243,4 +412,3 @@ code { font-family: "SF Mono","Fira Code",monospace; }
 .sidebar-active { font-weight: 600; background: #e9ecef !important; color: #0d6efd !important; }
 
 /* ── Footer ── */
-.wiki-footer { margin-top: 40px; padding: 14px 0; border-top: 1px solid #dee2e6; text-align: center; font-size: 11px; color: #6c757d; }
