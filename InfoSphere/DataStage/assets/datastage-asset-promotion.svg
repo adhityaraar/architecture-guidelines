@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">DataStage asset promotion and source control</title>
+  <desc id="desc">Developers build and test assets in a shared development project, version selected assets in source control, and promote controlled deployment packages to test and production.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #17202a; letter-spacing: 0; }
+      .title { font-size: 26px; font-weight: 700; }
+      .label { font-size: 18px; font-weight: 700; }
+      .body { font-size: 14px; }
+      .small { font-size: 13px; fill: #475569; }
+      .box { fill: #fff; stroke: #64748b; stroke-width: 2; rx: 6; }
+      .dev { fill: #eaf3ff; }
+      .neutral { fill: #f3f4f6; }
+      .test { fill: #fff6dc; }
+      .prod { fill: #eaf8ef; }
+      .flow { fill: none; stroke: #334155; stroke-width: 2.5; marker-end: url(#arrow); }
+      .two { fill: none; stroke: #2563eb; stroke-width: 2.5; marker-start: url(#arrow); marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1200" height="520" fill="#ffffff"/>
+  <text x="40" y="48" class="title">Controlled DataStage asset promotion</text>
+
+  <rect x="50" y="110" width="250" height="150" class="box dev"/>
+  <text x="72" y="146" class="label">Development project</text>
+  <text x="72" y="178" class="body">Design, compile, and unit test</text>
+  <text x="72" y="204" class="body">Jobs, routines, containers, rules</text>
+  <text x="72" y="230" class="small">Shared server-side workspace</text>
+
+  <rect x="390" y="110" width="250" height="150" class="box neutral"/>
+  <text x="412" y="146" class="label">Source control</text>
+  <text x="412" y="178" class="body">Versioned assets and labels</text>
+  <text x="412" y="204" class="body">Review and release evidence</text>
+  <text x="412" y="230" class="small">External history, not runtime state</text>
+
+  <path d="M300 185 H390" class="two"/>
+  <text x="312" y="164" class="small">Manager / team plug-in</text>
+
+  <rect x="390" y="330" width="250" height="118" class="box test"/>
+  <text x="412" y="366" class="label">Deployment package</text>
+  <text x="412" y="398" class="body">Built from exact repository assets</text>
+  <text x="412" y="424" class="small">InfoSphere Manager or istool</text>
+  <path d="M175 260 C175 355 300 389 390 389" class="flow"/>
+
+  <rect x="745" y="90" width="190" height="130" class="box test"/>
+  <text x="767" y="126" class="label">Test</text>
+  <text x="767" y="158" class="body">Import and validate</text>
+  <text x="767" y="184" class="body">Record evidence</text>
+
+  <rect x="985" y="90" width="170" height="130" class="box prod"/>
+  <text x="1007" y="126" class="label">Production</text>
+  <text x="1007" y="158" class="body">Approved release</text>
+  <text x="1007" y="184" class="body">Controlled rollback</text>
+
+  <path d="M640 372 C720 340 770 285 810 220" class="flow"/>
+  <path d="M935 155 H985" class="flow"/>
+  <text x="696" y="326" class="small">promote package</text>
+  <text x="940" y="139" class="small">approve</text>
+
+  <line x1="50" y1="482" x2="1155" y2="482" stroke="#cbd5e1"/>
+  <text x="50" y="506" class="small">Build packages from the repository after confirming the exact source-controlled versions are loaded. Do not copy live project files between environments.</text>
+</svg>

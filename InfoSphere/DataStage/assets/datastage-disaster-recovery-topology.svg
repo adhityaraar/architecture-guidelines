@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">DataStage disaster recovery topology</title>
+  <desc id="desc">Primary and recovery sites containing front end, services, repository, engine, and storage tiers with database and storage replication between sites.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <style>
+      .label { font: 600 20px Arial, sans-serif; fill: #20252b; }
+      .small { font: 16px Arial, sans-serif; fill: #38424d; }
+      .site-title { font: 700 24px Arial, sans-serif; fill: #20252b; }
+      .box-title { font: 700 17px Arial, sans-serif; fill: #20252b; }
+      .box-copy { font: 14px Arial, sans-serif; fill: #4b5563; }
+    </style>
+  </defs>
+
+  <rect x="1" y="1" width="1198" height="618" fill="#ffffff" stroke="#d7dde4" stroke-width="2"/>
+
+  <rect x="350" y="22" width="500" height="62" rx="4" fill="#f7f8fa" stroke="#69737d" stroke-width="2"/>
+  <text x="600" y="49" text-anchor="middle" class="label">Global DNS / Virtual Service Endpoint</text>
+  <text x="600" y="70" text-anchor="middle" class="small">Normal routing to primary; controlled switch during DR</text>
+
+  <line x1="470" y1="84" x2="290" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="730" y1="84" x2="910" y2="125" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="35" y="120" width="510" height="465" rx="4" fill="#fbfdfc" stroke="#0f7b5e" stroke-width="3"/>
+  <text x="290" y="154" text-anchor="middle" class="site-title">Primary Site</text>
+  <text x="290" y="177" text-anchor="middle" class="small">Active suite</text>
+
+  <rect x="80" y="198" width="420" height="54" rx="4" fill="#eaf7f2" stroke="#0f7b5e" stroke-width="2"/>
+  <text x="290" y="221" text-anchor="middle" class="box-title">Front End</text>
+  <text x="290" y="241" text-anchor="middle" class="box-copy">Load balancer / web endpoint</text>
+
+  <rect x="80" y="267" width="420" height="54" rx="4" fill="#eaf7f2" stroke="#0f7b5e" stroke-width="2"/>
+  <text x="290" y="290" text-anchor="middle" class="box-title">Services Tier</text>
+  <text x="290" y="310" text-anchor="middle" class="box-copy">Authentication, platform, and product services</text>
+
+  <rect x="80" y="336" width="195" height="74" rx="4" fill="#eaf7f2" stroke="#0f7b5e" stroke-width="2"/>
+  <text x="177" y="362" text-anchor="middle" class="box-title">Repository</text>
+  <text x="177" y="385" text-anchor="middle" class="box-copy">Database primary</text>
+
+  <rect x="305" y="336" width="195" height="74" rx="4" fill="#eaf7f2" stroke="#0f7b5e" stroke-width="2"/>
+  <text x="402" y="362" text-anchor="middle" class="box-title">Engine Tier</text>
+  <text x="402" y="385" text-anchor="middle" class="box-copy">Jobs and runtime</text>
+
+  <rect x="80" y="425" width="420" height="78" rx="4" fill="#eaf7f2" stroke="#0f7b5e" stroke-width="2"/>
+  <text x="290" y="453" text-anchor="middle" class="box-title">Persistent File Systems</text>
+  <text x="290" y="476" text-anchor="middle" class="box-copy">Projects, datasets, configuration, and required shared state</text>
+
+  <rect x="655" y="120" width="510" height="465" rx="4" fill="#fbfcfe" stroke="#3b6ea8" stroke-width="3"/>
+  <text x="910" y="154" text-anchor="middle" class="site-title">Recovery Site</text>
+  <text x="910" y="177" text-anchor="middle" class="small">Standby; activate all required tiers as one suite</text>
+
+  <rect x="700" y="198" width="420" height="54" rx="4" fill="#eef4fb" stroke="#3b6ea8" stroke-width="2"/>
+  <text x="910" y="221" text-anchor="middle" class="box-title">Front End</text>
+  <text x="910" y="241" text-anchor="middle" class="box-copy">DR endpoint with expected DNS identity</text>
+
+  <rect x="700" y="267" width="420" height="54" rx="4" fill="#eef4fb" stroke="#3b6ea8" stroke-width="2"/>
+  <text x="910" y="290" text-anchor="middle" class="box-title">Services Tier</text>
+  <text x="910" y="310" text-anchor="middle" class="box-copy">Synchronized configuration and dependencies</text>
+
+  <rect x="700" y="336" width="195" height="74" rx="4" fill="#eef4fb" stroke="#3b6ea8" stroke-width="2"/>
+  <text x="797" y="362" text-anchor="middle" class="box-title">Repository</text>
+  <text x="797" y="385" text-anchor="middle" class="box-copy">Standby / restored DB</text>
+
+  <rect x="925" y="336" width="195" height="74" rx="4" fill="#eef4fb" stroke="#3b6ea8" stroke-width="2"/>
+  <text x="1022" y="362" text-anchor="middle" class="box-title">Engine Tier</text>
+  <text x="1022" y="385" text-anchor="middle" class="box-copy">Recovery runtime</text>
+
+  <rect x="700" y="425" width="420" height="78" rx="4" fill="#eef4fb" stroke="#3b6ea8" stroke-width="2"/>
+  <text x="910" y="453" text-anchor="middle" class="box-title">Replicated / Restored File Systems</text>
+  <text x="910" y="476" text-anchor="middle" class="box-copy">Consistent recovery point and validated ownership</text>
+
+  <line x1="275" y1="373" x2="700" y2="373" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="405" y="348" width="165" height="26" fill="#ffffff"/>
+  <text x="487" y="367" text-anchor="middle" class="small">Db2 HADR optional</text>
+
+  <line x1="500" y1="464" x2="700" y2="464" stroke="#334155" stroke-width="2" marker-end="url(#arrow)"/>
+  <rect x="520" y="439" width="160" height="26" fill="#ffffff"/>
+  <text x="600" y="458" text-anchor="middle" class="small">Storage replication</text>
+
+  <text x="600" y="545" text-anchor="middle" class="small">Alternative: restore all tiers from a synchronized level-0 backup</text>
+  <text x="600" y="570" text-anchor="middle" class="small">After activation, reconcile repository, filesystems, interrupted jobs, and external transactions</text>
+</svg>

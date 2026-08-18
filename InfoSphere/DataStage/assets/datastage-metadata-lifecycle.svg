@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="620" viewBox="0 0 1200 620" role="img" aria-labelledby="title desc">
+  <title id="title">DataStage metadata lifecycle</title>
+  <desc id="desc">Business and external metadata enter the development repository, design assets are promoted through test and production, and production operational metadata is copied to a reporting environment.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #17202a; letter-spacing: 0; }
+      .title { font-size: 26px; font-weight: 700; }
+      .label { font-size: 18px; font-weight: 700; }
+      .body { font-size: 15px; }
+      .small { font-size: 13px; fill: #475569; }
+      .box { fill: #ffffff; stroke: #64748b; stroke-width: 2; rx: 6; }
+      .dev { fill: #eaf3ff; stroke: #2563eb; }
+      .test { fill: #fff6dc; stroke: #b7791f; }
+      .prod { fill: #eaf8ef; stroke: #16835b; }
+      .report { fill: #f1edff; stroke: #7253c7; }
+      .flow { fill: none; stroke: #334155; stroke-width: 2.5; marker-end: url(#arrow); }
+      .dash { fill: none; stroke: #7253c7; stroke-width: 2.5; stroke-dasharray: 8 7; marker-end: url(#arrow); }
+    </style>
+  </defs>
+
+  <rect width="1200" height="620" fill="#ffffff"/>
+  <text x="40" y="48" class="title">DataStage metadata lifecycle and environment boundaries</text>
+
+  <rect x="40" y="92" width="235" height="132" class="box"/>
+  <text x="58" y="123" class="label">Metadata sources</text>
+  <text x="58" y="154" class="body">Business terms and rules</text>
+  <text x="58" y="180" class="body">External schemas and BI</text>
+  <text x="58" y="206" class="body">Imported technical metadata</text>
+
+  <rect x="340" y="82" width="250" height="168" class="box dev"/>
+  <text x="362" y="116" class="label">Development</text>
+  <text x="362" y="146" class="body">Design and compile jobs</text>
+  <text x="362" y="172" class="body">Enrich reusable metadata</text>
+  <text x="362" y="198" class="body">Build release packages</text>
+  <text x="362" y="226" class="small">Business + technical metadata</text>
+
+  <rect x="650" y="82" width="220" height="168" class="box test"/>
+  <text x="672" y="116" class="label">Test</text>
+  <text x="672" y="146" class="body">Deploy approved package</text>
+  <text x="672" y="172" class="body">Validate dependencies</text>
+  <text x="672" y="198" class="body">Prove behavior and scale</text>
+  <text x="672" y="226" class="small">Environment-specific config</text>
+
+  <rect x="930" y="82" width="230" height="168" class="box prod"/>
+  <text x="952" y="116" class="label">Production</text>
+  <text x="952" y="146" class="body">Run released jobs</text>
+  <text x="952" y="172" class="body">Generate run history</text>
+  <text x="952" y="198" class="body">Record counts and status</text>
+  <text x="952" y="226" class="small">Operational metadata</text>
+
+  <path d="M275 158 H340" class="flow"/>
+  <path d="M590 166 H650" class="flow"/>
+  <path d="M870 166 H930" class="flow"/>
+  <text x="598" y="145" class="small">versioned package</text>
+  <text x="876" y="145" class="small">approved release</text>
+
+  <rect x="340" y="330" width="250" height="135" class="box"/>
+  <text x="362" y="364" class="label">Source control</text>
+  <text x="362" y="394" class="body">Version history and labels</text>
+  <text x="362" y="420" class="body">Release evidence</text>
+  <text x="362" y="447" class="small">Not a live runtime repository</text>
+  <path d="M465 250 V330" class="flow"/>
+
+  <rect x="735" y="330" width="325" height="170" class="box report"/>
+  <text x="758" y="366" class="label">Reporting metadata environment</text>
+  <text x="758" y="398" class="body">Production-aligned job design</text>
+  <text x="758" y="426" class="body">Imported production run metadata</text>
+  <text x="758" y="454" class="body">Lineage, impact, and governance</text>
+  <text x="758" y="482" class="small">Isolates reporting load from production</text>
+  <path d="M1045 250 C1045 290 1020 310 990 330" class="dash"/>
+  <path d="M590 214 C680 275 700 322 735 377" class="dash"/>
+  <text x="875" y="302" class="small">run metadata</text>
+  <text x="610" y="287" class="small">job design</text>
+
+  <line x1="40" y1="548" x2="1160" y2="548" stroke="#cbd5e1" stroke-width="1"/>
+  <text x="40" y="578" class="small">Internal metadata is created by Information Server modules. External metadata is imported before reuse.</text>
+  <text x="40" y="600" class="small">Promote selected assets; do not assume that every development or test metadata record belongs in production.</text>
+</svg>

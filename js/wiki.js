@@ -26,7 +26,11 @@
   var _levelsBelow = _rootIdx >= 0 ? Math.max(0, _currentDirParts.length - 1 - _rootIdx) : 0;
   var ROOT = '';
   for (var _j = 0; _j < _levelsBelow; _j++) ROOT += '../';
-  // ROOT is now '' for index.html, '../' for depth-1, '../../' for depth-2 etc.
+  // Prefer the loaded script URL so navigation also works when architecture/
+  // is served as the web root instead of appearing in the browser path.
+  if (document.currentScript && document.currentScript.src) {
+    ROOT = new URL('../', document.currentScript.src).href;
+  }
 
   // ── 1. Inject search bar CSS + HTML ──────────────────────────────────
   var _searchCSS = [
@@ -93,36 +97,6 @@
       headings: ['DB2 Must Gather Commands', 'Before you run', 'Command purpose', 'Collection commands', 'After collection'],
       body: 'DB2 must gather commands top db2pd -eve db2pd -stack all db2mon db2support database diagnostic collection package',
       db2page: 'db2/db2MustGather.html'
-    },
-    {
-      label: 'IIS DataStage',
-      tab: 'tab-infosphere',
-      tabLabel: 'LEGACY',
-      badgeColor: '#0f7b5e',
-      badgeBg: '#e6f4ee',
-      headings: ['IIS DataStage', 'DataStage HA Overview', 'Architecture Components'],
-      body: 'IBM InfoSphere Information Server IIS DataStage architecture client tools services tier repository tier engine tier ETL design scheduling metadata parallel execution',
-      href: 'InfoSphere/DataStage/ds-overview.html#iis-datastage'
-    },
-    {
-      label: 'DataStage Sizing',
-      tab: 'tab-infosphere',
-      tabLabel: 'LEGACY',
-      badgeColor: '#0f7b5e',
-      badgeBg: '#e6f4ee',
-      headings: ['DataStage Sizing', 'Sizing Questions', 'Planning Notes', 'Job Complexity Glossary'],
-      body: 'InfoSphere DataStage sizing questionnaire throughput execution window processing overlap job complexity operations console engine tier clustering active passive high availability services repository topology data growth simple medium complex very complex',
-      href: 'InfoSphere/DataStage/ds-sizing.html'
-    },
-    {
-      label: 'DataStage FAQ',
-      tab: 'tab-infosphere',
-      tabLabel: 'LEGACY',
-      badgeColor: '#0f7b5e',
-      badgeBg: '#e6f4ee',
-      headings: ['DataStage FAQ', 'Frequently Asked Questions'],
-      body: 'InfoSphere DataStage FAQ sizing architecture HADR diagnostics day to day operations engine repository services monitoring job restart failover scratch disk dataset',
-      href: 'InfoSphere/DataStage/ds-faq.html'
     },
     {
       label: 'CDC Sizing',
@@ -589,12 +563,12 @@
       {
         id: 'db2-start',
         label: 'Overview',
-        files: ['index.html', 'sizing.html', 'hadrBenefits.html', 'featureHistory.html', 'hadrTutorial.html']
+        files: ['index.html', 'sizing.html', 'hadrBenefits.html', 'featureHistory.html']
       },
       {
         id: 'db2-architecture',
         label: 'Architecture',
-        files: ['hadrConfig.html', 'hadrSyncMode.html', 'hadrLogShipping.html', 'clientReroute.html', 'clusterManagers.html', 'hadrPureScale.html', 'tcpTuning.html']
+        files: ['hadrSyncMode.html', 'hadrLogShipping.html', 'clientReroute.html', 'clusterManagers.html', 'hadrPureScale.html', 'tcpTuning.html']
       },
       {
         id: 'db2-hadr',
@@ -603,8 +577,13 @@
       },
       {
         id: 'db2-diag',
-        label: 'Diagnostics',
+        label: 'Operations',
         files: ['diagConnect.html', 'db2diag.html', 'db2MustGather.html', 'db2logscan.html', 'db2fmtlog.html', 'perfTuning.html']
+      },
+      {
+        id: 'db2-installation',
+        label: 'Installation',
+        files: ['hadrTutorial.html', 'hadrConfig.html']
       },
       {
         id: 'db2-faq',
@@ -624,7 +603,7 @@
       category.files.forEach(function (file) {
         if (byFile[file]) pages.appendChild(byFile[file]);
       });
-      if (!pages.children.length) return;
+      if (!pages.children.length) pages.appendChild(_createSidebarPlaceholder());
 
       var row = document.createElement('div');
       row.className = 'snav-product-row';
@@ -640,8 +619,6 @@
       section.appendChild(pages);
     });
   }
-
-  _categorizeDb2Sidebar();
 
   // ── 4. Group LEGACY product links into nested categories ─────────────
   function _createChevron() {
@@ -687,6 +664,9 @@
         if (category.label === 'Overview' && index === 0) byFile[file].textContent = 'Overview';
         pages.appendChild(byFile[file]);
       });
+      (category.links || []).forEach(function (link) {
+        pages.appendChild(_createSidebarLink(link.href, link.label));
+      });
       if (!pages.children.length) pages.appendChild(_createSidebarPlaceholder());
 
       var row = document.createElement('div');
@@ -700,6 +680,24 @@
     });
   }
 
+  function _categorizeGeneralSidebar() {
+    var section = document.getElementById('section-general');
+    if (!section || section.getAttribute('data-general-categorized') === 'true') return;
+
+    // Directly set the three link labels without grouping into sub-categories
+    var links = Array.from(section.querySelectorAll('a.list-group-item'));
+    var labelMap = {
+      'general-principles.html': 'Deployment Principles',
+      'general-licensing.html':  'IBM Licensing Guide',
+      'general-severity.html':   'IBM Severity Guide'
+    };
+    links.forEach(function (link) {
+      var file = (link.getAttribute('href') || '').split('#')[0].split('?')[0].split('/').pop();
+      if (labelMap[file]) link.textContent = labelMap[file];
+    });
+    section.setAttribute('data-general-categorized', 'true');
+  }
+
   function _categorizeInfosphereSidebar() {
     var section = document.getElementById('section-ds');
     var sectionLabel = document.querySelector('.sidebar-section-label[data-section="ds"]');
@@ -711,10 +709,10 @@
         nav: 'ds-datastage',
         label: 'DataStage',
         categories: [
-          { id: 'ds-overview', label: 'Overview', files: ['ds-overview.html', 'ds-sizing.html'] },
-          { id: 'ds-architecture', label: 'Architecture', files: ['ds-topology.html'] },
-          { id: 'ds-hadr', label: 'HADR', files: ['ds-engine.html', 'ds-repo.html', 'ds-recovery.html', 'ds-checklist.html'] },
-          { id: 'ds-diagnostics', label: 'Diagnostics', files: ['ds-monitoring.html'] },
+          { id: 'ds-overview', label: 'Overview', files: ['ds-overview.html'] },
+          { id: 'ds-architecture', label: 'Architecture', files: ['ds-topology.html', 'ds-engine.html', 'ds-repo.html'] },
+          { id: 'ds-deployment', label: 'Deployment', files: ['ds-checklist.html', 'ds-sizing.html'] },
+          { id: 'ds-operations', label: 'Operations', files: ['ds-monitoring.html', 'ds-recovery.html'] },
           { id: 'ds-faq', label: 'FAQ', files: ['ds-faq.html'] }
         ]
       },
@@ -725,7 +723,8 @@
           { id: 'cdc-overview', label: 'Overview', files: ['cdc-overview.html', 'cdc-sizing.html'] },
           { id: 'cdc-architecture', label: 'Architecture', files: [] },
           { id: 'cdc-hadr', label: 'HADR', files: [] },
-          { id: 'cdc-diagnostics', label: 'Diagnostics', files: [] },
+          { id: 'cdc-diagnostics', label: 'Operations', files: [] },
+          { id: 'cdc-installation', label: 'Installation', files: [] },
           { id: 'cdc-faq', label: 'FAQ', files: [] }
         ]
       },
@@ -736,7 +735,8 @@
           { id: 'dv-overview', label: 'Overview', files: ['dv-overview.html'] },
           { id: 'dv-architecture', label: 'Architecture', files: [] },
           { id: 'dv-hadr', label: 'HADR', files: [] },
-          { id: 'dv-diagnostics', label: 'Diagnostics', files: [] },
+          { id: 'dv-diagnostics', label: 'Operations', files: [] },
+          { id: 'dv-installation', label: 'Installation', files: [] },
           { id: 'dv-faq', label: 'FAQ', files: [] }
         ]
       },
@@ -747,7 +747,8 @@
           { id: 'ph-overview', label: 'Overview', files: ['ph-overview.html'] },
           { id: 'ph-architecture', label: 'Architecture', files: [] },
           { id: 'ph-hadr', label: 'HADR', files: [] },
-          { id: 'ph-diagnostics', label: 'Diagnostics', files: [] },
+          { id: 'ph-diagnostics', label: 'Operations', files: [] },
+          { id: 'ph-installation', label: 'Installation', files: [] },
           { id: 'ph-faq', label: 'FAQ', files: [] }
         ]
       }
@@ -759,12 +760,36 @@
           label: 'Overview',
           href: ROOT + 'InfoSphere/DataStage/ds-overview.html'
         },
+        'ds-topology.html': {
+          label: 'Architecture',
+          href: ROOT + 'InfoSphere/DataStage/ds-topology.html'
+        },
+        'ds-engine.html': {
+          label: 'Topology and Engine Patterns',
+          href: ROOT + 'InfoSphere/DataStage/ds-engine.html'
+        },
+        'ds-repo.html': {
+          label: 'HA / DR Architecture',
+          href: ROOT + 'InfoSphere/DataStage/ds-repo.html'
+        },
+        'ds-checklist.html': {
+          label: 'Deployment and Lifecycle',
+          href: ROOT + 'InfoSphere/DataStage/ds-checklist.html'
+        },
         'ds-sizing.html': {
           label: 'Sizing',
           href: ROOT + 'InfoSphere/DataStage/ds-sizing.html'
         },
+        'ds-monitoring.html': {
+          label: 'Day-to-Day Operations',
+          href: ROOT + 'InfoSphere/DataStage/ds-monitoring.html'
+        },
+        'ds-recovery.html': {
+          label: 'Backup and HA / DR Operations',
+          href: ROOT + 'InfoSphere/DataStage/ds-recovery.html'
+        },
         'ds-faq.html': {
-          label: 'FAQ',
+          label: 'FAQ and Quick Reference',
           href: ROOT + 'InfoSphere/DataStage/ds-faq.html'
         }
       },
@@ -829,7 +854,10 @@
 
       var knownPages = knownProductPages[product.nav] || {};
       Object.keys(knownPages).forEach(function (file) {
-        if (byFile[file]) return;
+        if (byFile[file]) {
+          byFile[file].textContent = knownPages[file].label;
+          return;
+        }
         byFile[file] = _createSidebarLink(knownPages[file].href, knownPages[file].label);
         productPages.appendChild(byFile[file]);
       });
@@ -840,8 +868,6 @@
 
     section.setAttribute('data-infosphere-categorized', 'true');
   }
-
-  _categorizeInfosphereSidebar();
 
   function _appendLinkIfMissing(pages, file, href, label) {
     if (!pages) return;
@@ -886,7 +912,8 @@
       { id: 'wx-lakehouse-overview', label: 'Overview', files: ['wxdata-overview.html', 'wxdata-sizing.html'] },
       { id: 'wx-lakehouse-architecture', label: 'Architecture', files: [] },
       { id: 'wx-lakehouse-hadr', label: 'HADR', files: [] },
-      { id: 'wx-lakehouse-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'wx-lakehouse-diagnostics', label: 'Operations', files: [] },
+      { id: 'wx-lakehouse-installation', label: 'Installation', files: [] },
       { id: 'wx-lakehouse-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -900,7 +927,8 @@
       { id: 'wx-integration-overview', label: 'Overview', files: ['wxi-overview.html', 'wxi-sizing.html', 'wxi-streamsets.html', 'wxi-manta.html', 'wxi-databand.html'] },
       { id: 'wx-integration-architecture', label: 'Architecture', files: [] },
       { id: 'wx-integration-hadr', label: 'HADR', files: [] },
-      { id: 'wx-integration-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'wx-integration-diagnostics', label: 'Operations', files: [] },
+      { id: 'wx-integration-installation', label: 'Installation', files: [] },
       { id: 'wx-integration-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -913,7 +941,8 @@
       { id: 'wx-intelligence-overview', label: 'Overview', files: ['wxn-overview.html', 'wxn-sizing.html', 'wxn-catalog.html', 'wxn-lineage.html'] },
       { id: 'wx-intelligence-architecture', label: 'Architecture', files: [] },
       { id: 'wx-intelligence-hadr', label: 'HADR', files: [] },
-      { id: 'wx-intelligence-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'wx-intelligence-diagnostics', label: 'Operations', files: [] },
+      { id: 'wx-intelligence-installation', label: 'Installation', files: [] },
       { id: 'wx-intelligence-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -931,7 +960,8 @@
       { id: 'gdp-dp-overview', label: 'Overview', files: ['gdp-overview.html', 'gdp-sizing.html'] },
       { id: 'gdp-dp-architecture', label: 'Architecture', files: [] },
       { id: 'gdp-dp-hadr', label: 'HADR', files: [] },
-      { id: 'gdp-dp-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'gdp-dp-diagnostics', label: 'Operations', files: [] },
+      { id: 'gdp-dp-installation', label: 'Installation', files: [] },
       { id: 'gdp-dp-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -942,7 +972,8 @@
       { id: 'gdp-dc-overview', label: 'Overview', files: ['gdc-overview.html', 'gdc-sizing.html'] },
       { id: 'gdp-dc-architecture', label: 'Architecture', files: [] },
       { id: 'gdp-dc-hadr', label: 'HADR', files: [] },
-      { id: 'gdp-dc-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'gdp-dc-diagnostics', label: 'Operations', files: [] },
+      { id: 'gdp-dc-installation', label: 'Installation', files: [] },
       { id: 'gdp-dc-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -951,10 +982,11 @@
     _appendLinkIfMissing(cryptoPages, 'gcm-installation.html', ROOT + 'Guardium/Guardium Crytography Manager/gcm-installation.html', 'Installation Requirements');
     _appendLinkIfMissing(cryptoPages, 'gcm-sizing.html', ROOT + 'Guardium/Guardium Crytography Manager/gcm-sizing.html', 'Sizing');
     _groupSidebarCategories(cryptoPages, [
-      { id: 'gdp-cm-overview', label: 'Overview', files: ['gcm-overview.html', 'gcm-installation.html', 'gcm-sizing.html'] },
+      { id: 'gdp-cm-overview', label: 'Overview', files: ['gcm-overview.html', 'gcm-sizing.html'] },
       { id: 'gdp-cm-architecture', label: 'Architecture', files: [] },
       { id: 'gdp-cm-hadr', label: 'HADR', files: [] },
-      { id: 'gdp-cm-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'gdp-cm-diagnostics', label: 'Operations', files: [] },
+      { id: 'gdp-cm-installation', label: 'Installation', files: ['gcm-installation.html'] },
       { id: 'gdp-cm-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -993,7 +1025,8 @@
       { id: 'optim-overview', label: 'Overview', files: ['optim-overview.html', 'optim-sizing.html'] },
       { id: 'optim-architecture', label: 'Architecture', files: [] },
       { id: 'optim-hadr', label: 'HADR', files: [] },
-      { id: 'optim-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'optim-diagnostics', label: 'Operations', files: [] },
+      { id: 'optim-installation', label: 'Installation', files: [] },
       { id: 'optim-faq', label: 'FAQ', files: [] }
     ], false);
 
@@ -1005,7 +1038,8 @@
       { id: 'mdm-overview', label: 'Overview', files: ['mdm-overview.html', 'mdm-sizing.html'] },
       { id: 'mdm-architecture', label: 'Architecture', files: [] },
       { id: 'mdm-hadr', label: 'HADR', files: [] },
-      { id: 'mdm-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'mdm-diagnostics', label: 'Operations', files: [] },
+      { id: 'mdm-installation', label: 'Installation', files: [] },
       { id: 'mdm-faq', label: 'FAQ', files: [] }
     ], false);
 
@@ -1025,7 +1059,8 @@
       { id: 'oem-edb-overview', label: 'Overview', files: ['edb-postgresql.html', 'edb-postgresql-sizing.html'] },
       { id: 'oem-edb-architecture', label: 'Architecture', files: [] },
       { id: 'oem-edb-hadr', label: 'HADR', files: [] },
-      { id: 'oem-edb-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'oem-edb-diagnostics', label: 'Operations', files: [] },
+      { id: 'oem-edb-installation', label: 'Installation', files: [] },
       { id: 'oem-edb-faq', label: 'FAQ', files: [] }
     ], true);
 
@@ -1036,17 +1071,1215 @@
       { id: 'oem-mongodb-overview', label: 'Overview', files: ['mongodb.html', 'mongodb-sizing.html'] },
       { id: 'oem-mongodb-architecture', label: 'Architecture', files: [] },
       { id: 'oem-mongodb-hadr', label: 'HADR', files: [] },
-      { id: 'oem-mongodb-diagnostics', label: 'Diagnostics', files: [] },
+      { id: 'oem-mongodb-diagnostics', label: 'Operations', files: [] },
+      { id: 'oem-mongodb-installation', label: 'Installation', files: [] },
       { id: 'oem-mongodb-faq', label: 'FAQ', files: [] }
     ], true);
 
     section.setAttribute('data-oem-grouped', 'true');
   }
 
-  _augmentWatsonxSidebar();
-  _augmentGuardiumSidebar();
-  _augmentTopLevelSidebar();
-  _normalizeOemSidebar();
+  // Keep every dashboard product aligned to the same category sequence.
+  function _renderDashboardCategoryTabs(host, source, prefix, categoryFiles, categoryLinks) {
+    if (!host || host.getAttribute('data-dashboard-categorized') === 'true') return;
+
+    var byFile = {};
+    Array.from((source || host).querySelectorAll('a[href]')).forEach(function (link) {
+      var href = link.getAttribute('href') || '';
+      var file = href.split('#')[0].split('?')[0].split('/').pop();
+      if (file && !byFile[file]) byFile[file] = {
+        href: href,
+        label: link.textContent.trim()
+      };
+    });
+
+    var order = [
+      { key: 'overview', label: 'Overview' },
+      { key: 'architecture', label: 'Architecture' },
+      { key: 'hadr', label: 'HADR' },
+      { key: 'operations', label: 'Operations' },
+      { key: 'installation', label: 'Installation' },
+      { key: 'faq', label: 'FAQ' }
+    ];
+
+    host.innerHTML = '';
+    host.setAttribute('data-dashboard-categorized', 'true');
+
+    var tabs = document.createElement('ul');
+    tabs.className = 'nav nav-tabs content-subcategory-tabs dashboard-category-tabs';
+    tabs.setAttribute('role', 'tablist');
+
+    var content = document.createElement('div');
+    content.className = 'tab-content content-category-content dashboard-category-content';
+
+    order.forEach(function (category, index) {
+      var tabId = prefix + '-cat-' + category.key;
+      var tabItem = document.createElement('li');
+      tabItem.className = 'nav-item';
+
+      var tab = document.createElement('a');
+      tab.className = 'nav-link' + (index === 0 ? ' active' : '');
+      tab.id = tabId + '-tab';
+      tab.href = '#' + tabId;
+      tab.textContent = category.label;
+      tab.setAttribute('data-toggle', 'tab');
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', tabId);
+      tab.setAttribute('aria-selected', index === 0 ? 'true' : 'false');
+      tabItem.appendChild(tab);
+      tabs.appendChild(tabItem);
+
+      var pane = document.createElement('div');
+      pane.className = 'tab-pane fade' + (index === 0 ? ' show active' : '');
+      pane.id = tabId;
+      pane.setAttribute('role', 'tabpanel');
+      pane.setAttribute('aria-labelledby', tab.id);
+
+      var links = [];
+      (categoryFiles[category.key] || []).forEach(function (file) {
+        if (byFile[file]) links.push(byFile[file]);
+      });
+      (categoryLinks[category.key] || []).forEach(function (link) {
+        links.push(link);
+      });
+
+      if (links.length) {
+        var list = document.createElement('ul');
+        list.className = 'content-page-list dashboard-category-list';
+        links.forEach(function (link) {
+          var item = document.createElement('li');
+          var anchor = document.createElement('a');
+          anchor.href = link.href;
+          anchor.textContent = link.label;
+          item.appendChild(anchor);
+          list.appendChild(item);
+        });
+        pane.appendChild(list);
+      } else {
+        var placeholder = document.createElement('p');
+        placeholder.className = 'text-muted font-italic mb-0 dashboard-category-wip';
+        placeholder.textContent = 'Work in progress';
+        pane.appendChild(placeholder);
+      }
+
+      content.appendChild(pane);
+    });
+
+    host.appendChild(tabs);
+    host.appendChild(content);
+  }
+
+  function _standardizeDashboardCategories() {
+    var productConfigs = {
+      'watsonx.data (Lakehouse)': { prefix: 'dashboard-wx-lakehouse', overview: ['wxdata-overview.html', 'wxdata-sizing.html'] },
+      'watsonx.data Integration': { prefix: 'dashboard-wx-integration', overview: ['wxi-overview.html', 'wxi-sizing.html', 'wxi-streamsets.html', 'wxi-manta.html', 'wxi-databand.html'] },
+      'watsonx.data Intelligence': { prefix: 'dashboard-wx-intelligence', overview: ['wxn-overview.html', 'wxn-sizing.html', 'wxn-catalog.html', 'wxn-lineage.html'] },
+      'Guardium Data Protection': { prefix: 'dashboard-gdp', overview: ['gdp-overview.html', 'gdp-sizing.html'] },
+      'Guardium Discover & Classify': { prefix: 'dashboard-gdc', overview: ['gdc-overview.html', 'gdc-sizing.html'] },
+      'Guardium Cryptography Manager': { prefix: 'dashboard-gcm', overview: ['gcm-overview.html', 'gcm-sizing.html'], installation: ['gcm-installation.html'] },
+      'EDB PostgreSQL': { prefix: 'dashboard-edb', overview: ['edb-postgresql.html', 'edb-postgresql-sizing.html'] },
+      'MongoDB': { prefix: 'dashboard-mongodb', overview: ['mongodb.html', 'mongodb-sizing.html'] },
+      'Optim': { prefix: 'dashboard-optim', overview: ['optim-overview.html', 'optim-sizing.html'] },
+      'Master Data Management': { prefix: 'dashboard-mdm', overview: ['mdm-overview.html', 'mdm-sizing.html'] },
+      'Deployment Principles': { prefix: 'dashboard-general-principles', overview: ['general-principles.html'] },
+      'IBM Licensing Guide': { prefix: 'dashboard-general-licensing', overview: ['general-licensing.html'] },
+      'IBM Severity Guide': { prefix: 'dashboard-general-severity', overview: ['general-severity.html'] }
+    };
+
+    document.querySelectorAll('.grp-product').forEach(function (product) {
+      var heading = product.querySelector('.grp-product-label strong');
+      var pages = product.querySelector('.grp-pages');
+      var config = heading && productConfigs[heading.textContent.trim()];
+      if (!pages || !config) return;
+
+      _renderDashboardCategoryTabs(pages, pages, config.prefix, {
+        overview: config.overview || [],
+        architecture: config.architecture || [],
+        hadr: config.hadr || [],
+        operations: config.operations || [],
+        installation: config.installation || [],
+        faq: config.faq || []
+      }, {});
+    });
+
+    [
+      { selector: '#legacy-datavirtualization', prefix: 'dashboard-dv', overview: ['dv-overview.html'] },
+      { selector: '#legacy-producthub', prefix: 'dashboard-ph', overview: ['ph-overview.html'] }
+    ].forEach(function (config) {
+      var pane = document.querySelector(config.selector);
+      var oldList = pane && pane.querySelector('.content-page-list');
+      if (!pane || !oldList) return;
+
+      var host = document.createElement('div');
+      pane.replaceChild(host, oldList);
+      _renderDashboardCategoryTabs(host, oldList, config.prefix, {
+        overview: config.overview,
+        architecture: [],
+        hadr: [],
+        operations: [],
+        installation: [],
+        faq: []
+      }, {});
+    });
+  }
+
+  // ── 4. Unified product content taxonomy ────────────────────────────
+  // One model drives both the dashboard and every sidebar. Missing topic
+  // entries intentionally render as "Work in progress".
+  var _CONTENT_SECTIONS = [
+    {
+      key: 'overview',
+      label: 'Overview',
+      topics: [
+        { key: 'introduction', label: 'Introduction' },
+        { key: 'key-capabilities', label: 'Key Capabilities' },
+        { key: 'use-cases', label: 'Use Cases' },
+        { key: 'terminology', label: 'Terminology' }
+      ]
+    },
+    {
+      key: 'architecture',
+      label: 'Architecture',
+      topics: [
+        { key: 'architecture-diagram', label: 'Architecture Diagram' },
+        { key: 'components', label: 'Components' },
+        { key: 'data-flow', label: 'Data Flow' },
+        { key: 'topologies', label: 'Topologies' },
+        { key: 'ha-dr-architecture', label: 'HA / DR Architecture' }
+      ]
+    },
+    {
+      key: 'deployment',
+      label: 'Deployment',
+      topics: [
+        { key: 'requirements', label: 'Requirements' },
+        { key: 'specifications', label: 'Specifications' },
+        { key: 'sizing', label: 'Sizing' },
+        { key: 'installation', label: 'Installation' },
+        { key: 'configuration', label: 'Configuration' },
+        { key: 'upgrade-migration', label: 'Upgrade / Migration' }
+      ]
+    },
+    {
+      key: 'operations',
+      label: 'Operations',
+      topics: [
+        { key: 'day-to-day', label: 'Day-to-Day Operations' },
+        { key: 'monitoring', label: 'Monitoring' },
+        { key: 'performance', label: 'Performance' },
+        { key: 'maintenance', label: 'Maintenance' },
+        { key: 'backup-recovery', label: 'Backup / Recovery' },
+        { key: 'ha-dr-operations', label: 'HA / DR Operations' },
+        { key: 'tools-commands', label: 'Tools / Commands' }
+      ]
+    },
+    {
+      key: 'faq',
+      label: 'FAQ',
+      topics: [
+        { key: 'logs', label: 'Logs' },
+        { key: 'diagnostics', label: 'Diagnostics' },
+        { key: 'common-issues', label: 'Common Issues' },
+        { key: 'rca', label: 'RCA' },
+        { key: 'best-practices', label: 'Best Practices' },
+        { key: 'quick-reference', label: 'Quick Reference' }
+      ]
+    }
+  ];
+
+  function _contentLink(href, label) {
+    return { href: href, label: label };
+  }
+
+  var L = _contentLink;
+  var _PRODUCT_CONTENT = {
+    general: {
+      overview: {
+        'introduction': [L('general/general-principles.html', 'Deployment Principles')],
+        'key-capabilities': [L('general/general-principles.html', 'Core Availability Principles')],
+        'use-cases': [L('general/general-licensing.html', 'Standby System Use Cases')],
+        'terminology': [L('general/general-severity.html', 'Severity Terminology'), L('general/general-licensing.html', 'Cold, Warm, and Hot Standby Definitions')]
+      },
+      architecture: {
+        'architecture-diagram': [L('general/general-licensing.html', 'Standby Topology Diagrams')],
+        'topologies': [L('general/general-licensing.html', 'Cold, Warm, and Hot Standby Topologies')],
+        'ha-dr-architecture': [L('general/general-principles.html', 'RPO, RTO, and HA / DR Design'), L('general/general-licensing.html', 'Standby Architecture and Licensing')]
+      },
+      deployment: {
+        'requirements': [L('general/general-principles.html', 'Availability and Recovery Requirements')]
+      },
+      operations: {
+        'day-to-day': [L('general/general-severity.html', 'Support Severity and Response Workflow')],
+        'monitoring': [L('general/general-severity.html', 'Incident Severity Monitoring')],
+        'maintenance': [L('general/general-principles.html', 'Operational Readiness Principles')],
+        'backup-recovery': [L('general/general-principles.html', 'RPO and RTO Framework')],
+        'ha-dr-operations': [L('general/general-licensing.html', 'Standby Testing and Operational Allowances')]
+      },
+      faq: {
+        'diagnostics': [L('general/general-severity.html', 'Severity Assessment')],
+        'common-issues': [L('general/general-severity.html', 'Common Severity Downgrade Scenarios')],
+        'rca': [L('general/general-severity.html', 'Incident Evidence and Support Response')],
+        'best-practices': [L('general/general-principles.html', 'Core Principles')],
+        'quick-reference': [L('general/general-severity.html', 'Severity and Response-Time Reference')]
+      }
+    },
+
+    db2: {
+      overview: {
+        'introduction': [L('db2/index.html', 'Db2 HADR Overview'), L('db2/hadrTutorial.html', 'HADR Introduction and Tutorial')],
+        'key-capabilities': [L('db2/hadrBenefits.html', 'HADR Benefits and Capabilities')],
+        'use-cases': [L('db2/hadrBenefits.html', 'High Availability and Disaster Recovery Use Cases')],
+        'terminology': [L('db2/hadrTutorial.html', 'HADR Roles, States, and Concepts'), L('db2/hadrSyncMode.html', 'Synchronization Modes')]
+      },
+      architecture: {
+        'architecture-diagram': [L('db2/hadrTutorial.html', 'HADR Architecture and Data Path'), L('db2/hadrPureScale.html', 'Db2 pureScale HADR Architecture')],
+        'components': [L('db2/hadrTutorial.html', 'Primary, Standby, and Log Components'), L('db2/clusterManagers.html', 'Cluster Managers')],
+        'data-flow': [L('db2/hadrLogShipping.html', 'HADR Log Shipping and Replay')],
+        'topologies': [L('db2/clusterManagers.html', 'Automated HADR Topologies'), L('db2/hadrPureScale.html', 'pureScale Topologies'), L('db2/clientReroute.html', 'Client Reroute Topology')],
+        'ha-dr-architecture': [L('db2/hadrSyncMode.html', 'Synchronization and Data-Loss Design'), L('db2/clientReroute.html', 'Client Failover Architecture')]
+      },
+      deployment: {
+        'requirements': [L('db2/hadrTutorial.html', 'HADR Requirements and Planning')],
+        'specifications': [L('db2/hadrConfig.html', 'HADR Configuration Parameters')],
+        'sizing': [L('db2/sizing.html', 'Db2 HADR Sizing')],
+        'installation': [L('db2/hadrTutorial.html', 'Setup, Initialization, and Validation')],
+        'configuration': [L('db2/hadrConfig.html', 'HADR Configuration'), L('db2/tcpTuning.html', 'TCP Configuration and Tuning')],
+        'upgrade-migration': [L('db2/featureHistory.html', 'Feature History and Version Planning'), L('db2/hadrTutorial.html', 'Rolling Update Guidance')]
+      },
+      operations: {
+        'day-to-day': [L('db2/hadrCommands.html', 'Routine HADR Commands'), L('db2/hadrTakeover.html', 'Takeover and Role Management')],
+        'monitoring': [L('db2/hadrMonitoring.html', 'HADR Monitoring')],
+        'performance': [L('db2/hadrPerf.html', 'HADR Performance'), L('db2/perfTuning.html', 'Db2 Performance Tuning'), L('db2/tcpTuning.html', 'Network Tuning')],
+        'maintenance': [L('db2/hadrCommands.html', 'Startup, Shutdown, and Role Operations')],
+        'backup-recovery': [L('db2/hadrTakeover.html', 'Takeover and Recovery Procedures')],
+        'ha-dr-operations': [L('db2/hadrTakeover.html', 'Planned and Forced Takeover'), L('db2/hadrCommands.html', 'HADR Operational Commands')],
+        'tools-commands': [L('db2/hadrSimulator.html', 'HADR Simulator'), L('db2/db2logscan.html', 'db2logscan'), L('db2/hadrCommands.html', 'Command Reference')]
+      },
+      faq: {
+        'logs': [L('db2/db2diag.html', 'db2diag.log'), L('db2/db2logscan.html', 'Transaction Log Scan'), L('db2/db2fmtlog.html', 'db2fmtlog Replay-Only Window')],
+        'diagnostics': [L('db2/diagConnect.html', 'Connection Diagnostics'), L('db2/db2MustGather.html', 'Db2 Must Gather')],
+        'common-issues': [L('db2/faq.html', 'Common HADR Questions and Issues')],
+        'rca': [L('db2/db2diag.html', 'Diagnostic Log Analysis'), L('db2/db2MustGather.html', 'Evidence Collection for RCA')],
+        'best-practices': [L('db2/hadrPerf.html', 'HADR Best Practices')],
+        'quick-reference': [L('db2/hadrCommands.html', 'HADR Command Quick Reference'), L('db2/faq.html', 'HADR FAQ')]
+      }
+    },
+
+    datastage: {
+      overview: {
+        'introduction':     [L('InfoSphere/DataStage/ds-introduction.html',    'Introduction')],
+        'key-capabilities': [L('InfoSphere/DataStage/ds-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('InfoSphere/DataStage/ds-use-cases.html',       'Use Cases')],
+        'terminology':      [L('InfoSphere/DataStage/ds-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('InfoSphere/DataStage/ds-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('InfoSphere/DataStage/ds-components.html',          'Components')],
+        'data-flow':            [L('InfoSphere/DataStage/ds-data-flow.html',           'Data Flow')],
+        'topologies':           [L('InfoSphere/DataStage/ds-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('InfoSphere/DataStage/ds-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('InfoSphere/DataStage/ds-requirements.html',     'Requirements')],
+        'specifications':    [L('InfoSphere/DataStage/ds-specifications.html',   'Specifications')],
+        'sizing':            [L('InfoSphere/DataStage/ds-sizing.html',           'Sizing')],
+        'installation':      [L('InfoSphere/DataStage/ds-installation.html',     'Installation')],
+        'configuration':     [L('InfoSphere/DataStage/ds-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('InfoSphere/DataStage/ds-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('InfoSphere/DataStage/ds-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('InfoSphere/DataStage/ds-monitoring.html',       'Monitoring')],
+        'performance':      [L('InfoSphere/DataStage/ds-performance.html',      'Performance')],
+        'maintenance':      [L('InfoSphere/DataStage/ds-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('InfoSphere/DataStage/ds-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('InfoSphere/DataStage/ds-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('InfoSphere/DataStage/ds-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('InfoSphere/DataStage/ds-logs.html',           'Logs')],
+        'diagnostics':     [L('InfoSphere/DataStage/ds-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('InfoSphere/DataStage/ds-common-issues.html',  'Common Issues')],
+        'rca':             [L('InfoSphere/DataStage/ds-rca.html',            'RCA')],
+        'best-practices':  [L('InfoSphere/DataStage/ds-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('InfoSphere/DataStage/ds-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    cdc: {
+      overview: {
+        'introduction':     [L('InfoSphere/Change Data Capture/cdc-introduction.html',    'Introduction')],
+        'key-capabilities': [L('InfoSphere/Change Data Capture/cdc-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('InfoSphere/Change Data Capture/cdc-use-cases.html',       'Use Cases')],
+        'terminology':      [L('InfoSphere/Change Data Capture/cdc-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('InfoSphere/Change Data Capture/cdc-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('InfoSphere/Change Data Capture/cdc-components.html',          'Components')],
+        'data-flow':            [L('InfoSphere/Change Data Capture/cdc-data-flow.html',           'Data Flow')],
+        'topologies':           [L('InfoSphere/Change Data Capture/cdc-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('InfoSphere/Change Data Capture/cdc-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('InfoSphere/Change Data Capture/cdc-requirements.html',     'Requirements')],
+        'specifications':    [L('InfoSphere/Change Data Capture/cdc-specifications.html',   'Specifications')],
+        'sizing':            [L('InfoSphere/Change Data Capture/cdc-sizing.html',           'Sizing')],
+        'installation':      [L('InfoSphere/Change Data Capture/cdc-installation.html',     'Installation')],
+        'configuration':     [L('InfoSphere/Change Data Capture/cdc-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('InfoSphere/Change Data Capture/cdc-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('InfoSphere/Change Data Capture/cdc-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('InfoSphere/Change Data Capture/cdc-monitoring.html',       'Monitoring')],
+        'performance':      [L('InfoSphere/Change Data Capture/cdc-performance.html',      'Performance')],
+        'maintenance':      [L('InfoSphere/Change Data Capture/cdc-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('InfoSphere/Change Data Capture/cdc-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('InfoSphere/Change Data Capture/cdc-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('InfoSphere/Change Data Capture/cdc-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('InfoSphere/Change Data Capture/cdc-logs.html',           'Logs')],
+        'diagnostics':     [L('InfoSphere/Change Data Capture/cdc-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('InfoSphere/Change Data Capture/cdc-common-issues.html',  'Common Issues')],
+        'rca':             [L('InfoSphere/Change Data Capture/cdc-rca.html',            'RCA')],
+        'best-practices':  [L('InfoSphere/Change Data Capture/cdc-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('InfoSphere/Change Data Capture/cdc-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    dataVirtualization: {
+      overview: {
+        'introduction':     [L('InfoSphere/Data Virtualization/dv-introduction.html',    'Introduction')],
+        'key-capabilities': [L('InfoSphere/Data Virtualization/dv-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('InfoSphere/Data Virtualization/dv-use-cases.html',       'Use Cases')],
+        'terminology':      [L('InfoSphere/Data Virtualization/dv-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('InfoSphere/Data Virtualization/dv-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('InfoSphere/Data Virtualization/dv-components.html',          'Components')],
+        'data-flow':            [L('InfoSphere/Data Virtualization/dv-data-flow.html',           'Data Flow')],
+        'topologies':           [L('InfoSphere/Data Virtualization/dv-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('InfoSphere/Data Virtualization/dv-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('InfoSphere/Data Virtualization/dv-requirements.html',     'Requirements')],
+        'specifications':    [L('InfoSphere/Data Virtualization/dv-specifications.html',   'Specifications')],
+        'sizing':            [L('InfoSphere/Data Virtualization/dv-sizing.html',           'Sizing')],
+        'installation':      [L('InfoSphere/Data Virtualization/dv-installation.html',     'Installation')],
+        'configuration':     [L('InfoSphere/Data Virtualization/dv-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('InfoSphere/Data Virtualization/dv-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('InfoSphere/Data Virtualization/dv-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('InfoSphere/Data Virtualization/dv-monitoring.html',       'Monitoring')],
+        'performance':      [L('InfoSphere/Data Virtualization/dv-performance.html',      'Performance')],
+        'maintenance':      [L('InfoSphere/Data Virtualization/dv-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('InfoSphere/Data Virtualization/dv-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('InfoSphere/Data Virtualization/dv-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('InfoSphere/Data Virtualization/dv-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('InfoSphere/Data Virtualization/dv-logs.html',           'Logs')],
+        'diagnostics':     [L('InfoSphere/Data Virtualization/dv-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('InfoSphere/Data Virtualization/dv-common-issues.html',  'Common Issues')],
+        'rca':             [L('InfoSphere/Data Virtualization/dv-rca.html',            'RCA')],
+        'best-practices':  [L('InfoSphere/Data Virtualization/dv-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('InfoSphere/Data Virtualization/dv-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    productHub: {
+      overview: {
+        'introduction':     [L('InfoSphere/Product Hub/ph-introduction.html',    'Introduction')],
+        'key-capabilities': [L('InfoSphere/Product Hub/ph-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('InfoSphere/Product Hub/ph-use-cases.html',       'Use Cases')],
+        'terminology':      [L('InfoSphere/Product Hub/ph-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('InfoSphere/Product Hub/ph-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('InfoSphere/Product Hub/ph-components.html',          'Components')],
+        'data-flow':            [L('InfoSphere/Product Hub/ph-data-flow.html',           'Data Flow')],
+        'topologies':           [L('InfoSphere/Product Hub/ph-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('InfoSphere/Product Hub/ph-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('InfoSphere/Product Hub/ph-requirements.html',     'Requirements')],
+        'specifications':    [L('InfoSphere/Product Hub/ph-specifications.html',   'Specifications')],
+        'sizing':            [L('InfoSphere/Product Hub/ph-sizing.html',           'Sizing')],
+        'installation':      [L('InfoSphere/Product Hub/ph-installation.html',     'Installation')],
+        'configuration':     [L('InfoSphere/Product Hub/ph-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('InfoSphere/Product Hub/ph-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('InfoSphere/Product Hub/ph-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('InfoSphere/Product Hub/ph-monitoring.html',       'Monitoring')],
+        'performance':      [L('InfoSphere/Product Hub/ph-performance.html',      'Performance')],
+        'maintenance':      [L('InfoSphere/Product Hub/ph-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('InfoSphere/Product Hub/ph-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('InfoSphere/Product Hub/ph-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('InfoSphere/Product Hub/ph-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('InfoSphere/Product Hub/ph-logs.html',           'Logs')],
+        'diagnostics':     [L('InfoSphere/Product Hub/ph-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('InfoSphere/Product Hub/ph-common-issues.html',  'Common Issues')],
+        'rca':             [L('InfoSphere/Product Hub/ph-rca.html',            'RCA')],
+        'best-practices':  [L('InfoSphere/Product Hub/ph-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('InfoSphere/Product Hub/ph-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    lakehouse: {
+      overview: {
+        'introduction':     [L('watsonx.data/wxl-introduction.html',    'Introduction')],
+        'key-capabilities': [L('watsonx.data/wxl-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('watsonx.data/wxl-use-cases.html',       'Use Cases')],
+        'terminology':      [L('watsonx.data/wxl-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('watsonx.data/wxl-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('watsonx.data/wxl-components.html',          'Components')],
+        'data-flow':            [L('watsonx.data/wxl-data-flow.html',           'Data Flow')],
+        'topologies':           [L('watsonx.data/wxl-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('watsonx.data/wxl-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('watsonx.data/wxl-requirements.html',     'Requirements')],
+        'specifications':    [L('watsonx.data/wxl-specifications.html',   'Specifications')],
+        'sizing':            [L('watsonx.data/wxdata-sizing.html',        'Sizing')],
+        'installation':      [L('watsonx.data/wxl-installation.html',     'Installation')],
+        'configuration':     [L('watsonx.data/wxl-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('watsonx.data/wxl-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('watsonx.data/wxl-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('watsonx.data/wxl-monitoring.html',       'Monitoring')],
+        'performance':      [L('watsonx.data/wxl-performance.html',      'Performance')],
+        'maintenance':      [L('watsonx.data/wxl-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('watsonx.data/wxl-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('watsonx.data/wxl-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('watsonx.data/wxl-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('watsonx.data/wxl-logs.html',           'Logs')],
+        'diagnostics':     [L('watsonx.data/wxl-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('watsonx.data/wxl-common-issues.html',  'Common Issues')],
+        'rca':             [L('watsonx.data/wxl-rca.html',            'RCA')],
+        'best-practices':  [L('watsonx.data/wxl-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('watsonx.data/wxl-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    integration: {
+      overview: {
+        'introduction':     [L('watsonx.data Integration/wxi-introduction.html',    'Introduction')],
+        'key-capabilities': [L('watsonx.data Integration/wxi-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('watsonx.data Integration/wxi-use-cases.html',       'Use Cases')],
+        'terminology':      [L('watsonx.data Integration/wxi-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('watsonx.data Integration/wxi-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('watsonx.data Integration/wxi-components.html',          'Components')],
+        'data-flow':            [L('watsonx.data Integration/wxi-data-flow.html',           'Data Flow')],
+        'topologies':           [L('watsonx.data Integration/wxi-topology.html',            'Topologies')],
+        'ha-dr-architecture':   [L('watsonx.data Integration/wxi-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('watsonx.data Integration/wxi-requirements.html',     'Requirements')],
+        'specifications':    [L('watsonx.data Integration/wxi-specifications.html',   'Specifications')],
+        'sizing':            [L('watsonx.data Integration/wxi-sizing.html',           'Sizing')],
+        'installation':      [L('watsonx.data Integration/wxi-installation.html',     'Installation')],
+        'configuration':     [L('watsonx.data Integration/wxi-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('watsonx.data Integration/wxi-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('watsonx.data Integration/wxi-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('watsonx.data Integration/wxi-monitoring.html',       'Monitoring')],
+        'performance':      [L('watsonx.data Integration/wxi-performance.html',      'Performance')],
+        'maintenance':      [L('watsonx.data Integration/wxi-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('watsonx.data Integration/wxi-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('watsonx.data Integration/wxi-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('watsonx.data Integration/wxi-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('watsonx.data Integration/wxi-logs.html',           'Logs')],
+        'diagnostics':     [L('watsonx.data Integration/wxi-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('watsonx.data Integration/wxi-common-issues.html',  'Common Issues')],
+        'rca':             [L('watsonx.data Integration/wxi-rca.html',            'RCA')],
+        'best-practices':  [L('watsonx.data Integration/wxi-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('watsonx.data Integration/wxi-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    intelligence: {
+      overview: {
+        'introduction':     [L('watsonx.data Intelligence/wxn-introduction.html',    'Introduction')],
+        'key-capabilities': [L('watsonx.data Intelligence/wxn-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('watsonx.data Intelligence/wxn-use-cases.html',       'Use Cases')],
+        'terminology':      [L('watsonx.data Intelligence/wxn-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('watsonx.data Intelligence/wxn-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('watsonx.data Intelligence/wxn-components.html',          'Components')],
+        'data-flow':            [L('watsonx.data Intelligence/wxn-data-flow.html',           'Data Flow')],
+        'topologies':           [L('watsonx.data Intelligence/wxn-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('watsonx.data Intelligence/wxn-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('watsonx.data Intelligence/wxn-requirements.html',     'Requirements')],
+        'specifications':    [L('watsonx.data Intelligence/wxn-specifications.html',   'Specifications')],
+        'sizing':            [L('watsonx.data Intelligence/wxn-sizing.html',           'Sizing')],
+        'installation':      [L('watsonx.data Intelligence/wxn-installation.html',     'Installation')],
+        'configuration':     [L('watsonx.data Intelligence/wxn-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('watsonx.data Intelligence/wxn-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('watsonx.data Intelligence/wxn-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('watsonx.data Intelligence/wxn-monitoring.html',       'Monitoring')],
+        'performance':      [L('watsonx.data Intelligence/wxn-performance.html',      'Performance')],
+        'maintenance':      [L('watsonx.data Intelligence/wxn-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('watsonx.data Intelligence/wxn-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('watsonx.data Intelligence/wxn-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('watsonx.data Intelligence/wxn-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('watsonx.data Intelligence/wxn-logs.html',           'Logs')],
+        'diagnostics':     [L('watsonx.data Intelligence/wxn-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('watsonx.data Intelligence/wxn-common-issues.html',  'Common Issues')],
+        'rca':             [L('watsonx.data Intelligence/wxn-rca.html',            'RCA')],
+        'best-practices':  [L('watsonx.data Intelligence/wxn-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('watsonx.data Intelligence/wxn-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    guardiumDataProtection: {
+      overview: {
+        'introduction':     [L('Guardium/Guardium Data Protection/gdp-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Guardium/Guardium Data Protection/gdp-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Guardium/Guardium Data Protection/gdp-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Guardium/Guardium Data Protection/gdp-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Guardium/Guardium Data Protection/gdp-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('Guardium/Guardium Data Protection/gdp-components.html',          'Components')],
+        'data-flow':            [L('Guardium/Guardium Data Protection/gdp-data-flow.html',           'Data Flow')],
+        'topologies':           [L('Guardium/Guardium Data Protection/gdp-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('Guardium/Guardium Data Protection/gdp-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Guardium/Guardium Data Protection/gdp-requirements.html',     'Requirements')],
+        'specifications':    [L('Guardium/Guardium Data Protection/gdp-specifications.html',   'Specifications')],
+        'sizing':            [L('Guardium/Guardium Data Protection/gdp-sizing.html',            'Sizing')],
+        'installation':      [L('Guardium/Guardium Data Protection/gdp-installation.html',     'Installation')],
+        'configuration':     [L('Guardium/Guardium Data Protection/gdp-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('Guardium/Guardium Data Protection/gdp-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Guardium/Guardium Data Protection/gdp-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('Guardium/Guardium Data Protection/gdp-monitoring.html',       'Monitoring')],
+        'performance':      [L('Guardium/Guardium Data Protection/gdp-performance.html',      'Performance')],
+        'maintenance':      [L('Guardium/Guardium Data Protection/gdp-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('Guardium/Guardium Data Protection/gdp-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('Guardium/Guardium Data Protection/gdp-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('Guardium/Guardium Data Protection/gdp-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Guardium/Guardium Data Protection/gdp-logs.html',           'Logs')],
+        'diagnostics':     [L('Guardium/Guardium Data Protection/gdp-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('Guardium/Guardium Data Protection/gdp-common-issues.html',  'Common Issues')],
+        'rca':             [L('Guardium/Guardium Data Protection/gdp-rca.html',            'RCA')],
+        'best-practices':  [L('Guardium/Guardium Data Protection/gdp-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('Guardium/Guardium Data Protection/gdp-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    guardiumDiscover: {
+      overview: {
+        'introduction':     [L('Guardium/Guardium Discover and Classify/gdc-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Guardium/Guardium Discover and Classify/gdc-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Guardium/Guardium Discover and Classify/gdc-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Guardium/Guardium Discover and Classify/gdc-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Guardium/Guardium Discover and Classify/gdc-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('Guardium/Guardium Discover and Classify/gdc-components.html',          'Components')],
+        'data-flow':            [L('Guardium/Guardium Discover and Classify/gdc-data-flow.html',           'Data Flow')],
+        'topologies':           [L('Guardium/Guardium Discover and Classify/gdc-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('Guardium/Guardium Discover and Classify/gdc-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Guardium/Guardium Discover and Classify/gdc-requirements.html',     'Requirements')],
+        'specifications':    [L('Guardium/Guardium Discover and Classify/gdc-specifications.html',   'Specifications')],
+        'sizing':            [L('Guardium/Guardium Discover and Classify/gdc-sizing.html',            'Sizing')],
+        'installation':      [L('Guardium/Guardium Discover and Classify/gdc-installation.html',     'Installation')],
+        'configuration':     [L('Guardium/Guardium Discover and Classify/gdc-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('Guardium/Guardium Discover and Classify/gdc-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Guardium/Guardium Discover and Classify/gdc-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('Guardium/Guardium Discover and Classify/gdc-monitoring.html',       'Monitoring')],
+        'performance':      [L('Guardium/Guardium Discover and Classify/gdc-performance.html',      'Performance')],
+        'maintenance':      [L('Guardium/Guardium Discover and Classify/gdc-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('Guardium/Guardium Discover and Classify/gdc-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('Guardium/Guardium Discover and Classify/gdc-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('Guardium/Guardium Discover and Classify/gdc-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Guardium/Guardium Discover and Classify/gdc-logs.html',           'Logs')],
+        'diagnostics':     [L('Guardium/Guardium Discover and Classify/gdc-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('Guardium/Guardium Discover and Classify/gdc-common-issues.html',  'Common Issues')],
+        'rca':             [L('Guardium/Guardium Discover and Classify/gdc-rca.html',            'RCA')],
+        'best-practices':  [L('Guardium/Guardium Discover and Classify/gdc-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('Guardium/Guardium Discover and Classify/gdc-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    guardiumCrypto: {
+      overview: {
+        'introduction':     [L('Guardium/Guardium Crytography Manager/gcm-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Guardium/Guardium Crytography Manager/gcm-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Guardium/Guardium Crytography Manager/gcm-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Guardium/Guardium Crytography Manager/gcm-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Guardium/Guardium Crytography Manager/gcm-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('Guardium/Guardium Crytography Manager/gcm-components.html',          'Components')],
+        'data-flow':            [L('Guardium/Guardium Crytography Manager/gcm-data-flow.html',           'Data Flow')],
+        'topologies':           [L('Guardium/Guardium Crytography Manager/gcm-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('Guardium/Guardium Crytography Manager/gcm-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Guardium/Guardium Crytography Manager/gcm-requirements.html',     'Requirements')],
+        'specifications':    [L('Guardium/Guardium Crytography Manager/gcm-specifications.html',   'Specifications')],
+        'sizing':            [L('Guardium/Guardium Crytography Manager/gcm-sizing.html',            'Sizing')],
+        'installation':      [L('Guardium/Guardium Crytography Manager/gcm-installation.html',     'Installation')],
+        'configuration':     [L('Guardium/Guardium Crytography Manager/gcm-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('Guardium/Guardium Crytography Manager/gcm-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Guardium/Guardium Crytography Manager/gcm-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('Guardium/Guardium Crytography Manager/gcm-monitoring.html',       'Monitoring')],
+        'performance':      [L('Guardium/Guardium Crytography Manager/gcm-performance.html',      'Performance')],
+        'maintenance':      [L('Guardium/Guardium Crytography Manager/gcm-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('Guardium/Guardium Crytography Manager/gcm-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('Guardium/Guardium Crytography Manager/gcm-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('Guardium/Guardium Crytography Manager/gcm-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Guardium/Guardium Crytography Manager/gcm-logs.html',           'Logs')],
+        'diagnostics':     [L('Guardium/Guardium Crytography Manager/gcm-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('Guardium/Guardium Crytography Manager/gcm-common-issues.html',  'Common Issues')],
+        'rca':             [L('Guardium/Guardium Crytography Manager/gcm-rca.html',            'RCA')],
+        'best-practices':  [L('Guardium/Guardium Crytography Manager/gcm-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('Guardium/Guardium Crytography Manager/gcm-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    edb: {
+      overview: {
+        'introduction':     [L('Guardium/OEM/edb-postgresql-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Guardium/OEM/edb-postgresql-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Guardium/OEM/edb-postgresql-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Guardium/OEM/edb-postgresql-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Guardium/OEM/edb-postgresql-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('Guardium/OEM/edb-postgresql-components.html',          'Components')],
+        'data-flow':            [L('Guardium/OEM/edb-postgresql-data-flow.html',           'Data Flow')],
+        'topologies':           [L('Guardium/OEM/edb-postgresql-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('Guardium/OEM/edb-postgresql-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Guardium/OEM/edb-postgresql-requirements.html',     'Requirements')],
+        'specifications':    [L('Guardium/OEM/edb-postgresql-specifications.html',   'Specifications')],
+        'sizing':            [L('Guardium/OEM/edb-postgresql-sizing.html',           'Sizing')],
+        'installation':      [L('Guardium/OEM/edb-postgresql-installation.html',     'Installation')],
+        'configuration':     [L('Guardium/OEM/edb-postgresql-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('Guardium/OEM/edb-postgresql-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Guardium/OEM/edb-postgresql-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('Guardium/OEM/edb-postgresql-monitoring.html',       'Monitoring')],
+        'performance':      [L('Guardium/OEM/edb-postgresql-performance.html',      'Performance')],
+        'maintenance':      [L('Guardium/OEM/edb-postgresql-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('Guardium/OEM/edb-postgresql-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('Guardium/OEM/edb-postgresql-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('Guardium/OEM/edb-postgresql-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Guardium/OEM/edb-postgresql-logs.html',           'Logs')],
+        'diagnostics':     [L('Guardium/OEM/edb-postgresql-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('Guardium/OEM/edb-postgresql-common-issues.html',  'Common Issues')],
+        'rca':             [L('Guardium/OEM/edb-postgresql-rca.html',            'RCA')],
+        'best-practices':  [L('Guardium/OEM/edb-postgresql-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('Guardium/OEM/edb-postgresql-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    mongodb: {
+      overview: {
+        'introduction':     [L('Guardium/OEM/mongodb-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Guardium/OEM/mongodb-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Guardium/OEM/mongodb-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Guardium/OEM/mongodb-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Guardium/OEM/mongodb-architecture-diagram.html', 'Architecture Diagram')],
+        'components':           [L('Guardium/OEM/mongodb-components.html',            'Components')],
+        'data-flow':            [L('Guardium/OEM/mongodb-data-flow.html',             'Data Flow')],
+        'topologies':           [L('Guardium/OEM/mongodb-topologies.html',            'Topologies')],
+        'ha-dr-architecture':   [L('Guardium/OEM/mongodb-ha-dr-architecture.html',   'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Guardium/OEM/mongodb-requirements.html',      'Requirements')],
+        'specifications':    [L('Guardium/OEM/mongodb-specifications.html',     'Specifications')],
+        'sizing':            [L('Guardium/OEM/mongodb-sizing.html',             'Sizing')],
+        'installation':      [L('Guardium/OEM/mongodb-installation.html',       'Installation')],
+        'configuration':     [L('Guardium/OEM/mongodb-configuration.html',      'Configuration')],
+        'upgrade-migration': [L('Guardium/OEM/mongodb-upgrade-migration.html',  'Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Guardium/OEM/mongodb-day-to-day.html',       'Day-to-Day Operations')],
+        'monitoring':       [L('Guardium/OEM/mongodb-monitoring.html',        'Monitoring')],
+        'performance':      [L('Guardium/OEM/mongodb-performance.html',       'Performance')],
+        'maintenance':      [L('Guardium/OEM/mongodb-maintenance.html',       'Maintenance')],
+        'backup-recovery':  [L('Guardium/OEM/mongodb-backup-recovery.html',   'Backup / Recovery')],
+        'ha-dr-operations': [L('Guardium/OEM/mongodb-ha-dr-operations.html',  'HA / DR Operations')],
+        'tools-commands':   [L('Guardium/OEM/mongodb-tools-commands.html',    'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Guardium/OEM/mongodb-logs.html',            'Logs')],
+        'diagnostics':     [L('Guardium/OEM/mongodb-diagnostics.html',     'Diagnostics')],
+        'common-issues':   [L('Guardium/OEM/mongodb-common-issues.html',   'Common Issues')],
+        'rca':             [L('Guardium/OEM/mongodb-rca.html',             'RCA')],
+        'best-practices':  [L('Guardium/OEM/mongodb-best-practices.html',  'Best Practices')],
+        'quick-reference': [L('Guardium/OEM/mongodb-quick-reference.html', 'Quick Reference')]
+      }
+    },
+
+    optim: {
+      overview: {
+        'introduction':     [L('Optim/optim-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Optim/optim-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Optim/optim-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Optim/optim-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Optim/optim-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('Optim/optim-components.html',          'Components')],
+        'data-flow':            [L('Optim/optim-data-flow.html',           'Data Flow')],
+        'topologies':           [L('Optim/optim-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('Optim/optim-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Optim/optim-requirements.html',     'Requirements')],
+        'specifications':    [L('Optim/optim-specifications.html',   'Specifications')],
+        'sizing':            [L('Optim/optim-sizing.html',           'Sizing')],
+        'installation':      [L('Optim/optim-installation.html',     'Installation')],
+        'configuration':     [L('Optim/optim-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('Optim/optim-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Optim/optim-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('Optim/optim-monitoring.html',       'Monitoring')],
+        'performance':      [L('Optim/optim-performance.html',      'Performance')],
+        'maintenance':      [L('Optim/optim-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('Optim/optim-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('Optim/optim-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('Optim/optim-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Optim/optim-logs.html',           'Logs')],
+        'diagnostics':     [L('Optim/optim-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('Optim/optim-common-issues.html',  'Common Issues')],
+        'rca':             [L('Optim/optim-rca.html',            'RCA')],
+        'best-practices':  [L('Optim/optim-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('Optim/optim-quick-reference.html','Quick Reference')]
+      }
+    },
+
+    mdm: {
+      overview: {
+        'introduction':     [L('Master Data Management/mdm-introduction.html',    'Introduction')],
+        'key-capabilities': [L('Master Data Management/mdm-key-capabilities.html','Key Capabilities')],
+        'use-cases':        [L('Master Data Management/mdm-use-cases.html',       'Use Cases')],
+        'terminology':      [L('Master Data Management/mdm-terminology.html',     'Terminology')]
+      },
+      architecture: {
+        'architecture-diagram': [L('Master Data Management/mdm-architecture-diagram.html','Architecture Diagram')],
+        'components':           [L('Master Data Management/mdm-components.html',          'Components')],
+        'data-flow':            [L('Master Data Management/mdm-data-flow.html',           'Data Flow')],
+        'topologies':           [L('Master Data Management/mdm-topologies.html',          'Topologies')],
+        'ha-dr-architecture':   [L('Master Data Management/mdm-ha-dr-architecture.html',  'HA / DR Architecture')]
+      },
+      deployment: {
+        'requirements':      [L('Master Data Management/mdm-requirements.html',     'Requirements')],
+        'specifications':    [L('Master Data Management/mdm-specifications.html',   'Specifications')],
+        'sizing':            [L('Master Data Management/mdm-sizing.html',           'Sizing')],
+        'installation':      [L('Master Data Management/mdm-installation.html',     'Installation')],
+        'configuration':     [L('Master Data Management/mdm-configuration.html',    'Configuration')],
+        'upgrade-migration': [L('Master Data Management/mdm-upgrade-migration.html','Upgrade / Migration')]
+      },
+      operations: {
+        'day-to-day':       [L('Master Data Management/mdm-day-to-day.html',      'Day-to-Day Operations')],
+        'monitoring':       [L('Master Data Management/mdm-monitoring.html',       'Monitoring')],
+        'performance':      [L('Master Data Management/mdm-performance.html',      'Performance')],
+        'maintenance':      [L('Master Data Management/mdm-maintenance.html',      'Maintenance')],
+        'backup-recovery':  [L('Master Data Management/mdm-backup-recovery.html',  'Backup / Recovery')],
+        'ha-dr-operations': [L('Master Data Management/mdm-ha-dr-operations.html', 'HA / DR Operations')],
+        'tools-commands':   [L('Master Data Management/mdm-tools-commands.html',   'Tools / Commands')]
+      },
+      faq: {
+        'logs':            [L('Master Data Management/mdm-logs.html',           'Logs')],
+        'diagnostics':     [L('Master Data Management/mdm-diagnostics.html',    'Diagnostics')],
+        'common-issues':   [L('Master Data Management/mdm-common-issues.html',  'Common Issues')],
+        'rca':             [L('Master Data Management/mdm-rca.html',            'RCA')],
+        'best-practices':  [L('Master Data Management/mdm-best-practices.html', 'Best Practices')],
+        'quick-reference': [L('Master Data Management/mdm-quick-reference.html','Quick Reference')]
+      }
+    }
+  };
+
+  function _topicLinks(productKey, sectionKey, topicKey) {
+    var product = _PRODUCT_CONTENT[productKey] || {};
+    var section = product[sectionKey] || {};
+    return section[topicKey] || [];
+  }
+
+  function _sidebarLevel(level) {
+    if (level === 0) return { row: 'snav-product-row', pages: 'snav-product-pages', data: 'data-snav' };
+    if (level === 1) return { row: 'snav-category-row', pages: 'snav-category-pages', data: 'data-snav-category' };
+    return { row: 'snav-subcategory-row', pages: 'snav-subcategory-pages', data: 'data-snav-subcategory' };
+  }
+
+  function _appendSidebarBranch(container, level, id, label, buildChildren) {
+    var classes = _sidebarLevel(level);
+    var row = document.createElement('div');
+    row.className = classes.row;
+    row.setAttribute(classes.data, id);
+    row.appendChild(document.createTextNode(label + ' '));
+    row.appendChild(_createChevron());
+
+    var pages = document.createElement('div');
+    pages.className = classes.pages + ' collapsed';
+    pages.id = 'snav-' + id;
+    buildChildren(pages);
+
+    container.appendChild(row);
+    container.appendChild(pages);
+  }
+
+  function _renderSidebarTaxonomy(container, productKey, prefix, startLevel) {
+    _CONTENT_SECTIONS.forEach(function (section) {
+      _appendSidebarBranch(container, startLevel, prefix + '-' + section.key, section.label, function (sectionPages) {
+        section.topics.forEach(function (topic) {
+          _appendSidebarBranch(sectionPages, startLevel + 1, prefix + '-' + section.key + '-' + topic.key, topic.label, function (topicPages) {
+            var links = _topicLinks(productKey, section.key, topic.key);
+            links.forEach(function (link) {
+              topicPages.appendChild(_createSidebarLink(ROOT + link.href, link.label));
+            });
+            if (!links.length) topicPages.appendChild(_createSidebarPlaceholder());
+          });
+        });
+      });
+    });
+  }
+
+  // Flat variant: section rows have a chevron, topics are direct links (no sub-chevron)
+  function _renderSidebarTaxonomyFlat(container, productKey, prefix, startLevel) {
+    _CONTENT_SECTIONS.forEach(function (section) {
+      _appendSidebarBranch(container, startLevel, prefix + '-' + section.key, section.label, function (sectionPages) {
+        section.topics.forEach(function (topic) {
+          var links = _topicLinks(productKey, section.key, topic.key);
+          if (links.length) {
+            sectionPages.appendChild(_createSidebarLink(ROOT + links[0].href, links[0].label));
+          } else {
+            sectionPages.appendChild(_createSidebarPlaceholder());
+          }
+        });
+      });
+    });
+  }
+
+  function _rebuildDirectSidebar(sectionId, productKey, prefix) {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    section.innerHTML = '';
+    _renderSidebarTaxonomy(section, productKey, prefix, 0);
+  }
+
+  // OEM sidebar: Product branch → Section direct link (no topic sub-level)
+  function _rebuildOEMSidebar(sectionId, products) {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    section.innerHTML = '';
+    products.forEach(function (product) {
+      _appendSidebarBranch(section, 0, product.prefix, product.label, function (productPages) {
+        var productData = _PRODUCT_CONTENT[product.key] || {};
+        _CONTENT_SECTIONS.forEach(function (sec) {
+          // Find first available link for this section across all its topics
+          var href = null;
+          var sectionData = productData[sec.key] || {};
+          sec.topics.some(function (topic) {
+            var links = sectionData[topic.key] || [];
+            if (links.length) { href = links[0].href; return true; }
+          });
+          if (href) {
+            productPages.appendChild(_createSidebarLink(ROOT + href, sec.label));
+          }
+        });
+      });
+    });
+  }
+
+  function _rebuildGroupedSidebar(sectionId, products) {
+    var section = document.getElementById(sectionId);
+    if (!section) return;
+    section.innerHTML = '';
+    products.forEach(function (product) {
+      _appendSidebarBranch(section, 0, product.prefix, product.label, function (productPages) {
+        _renderSidebarTaxonomy(productPages, product.key, product.prefix, 1);
+      });
+    });
+  }
+
+  function _applyUnifiedSidebarTaxonomy() {
+    // General sidebar: flat three links only
+    (function () {
+      var section = document.getElementById('section-general');
+      if (!section) return;
+      section.innerHTML = '';
+      // ROOT is the module-level variable computed from wiki.js script src
+      [
+        { href: ROOT + 'general/general-principles.html', label: 'Deployment Principles' },
+        { href: ROOT + 'general/general-licensing.html',  label: 'IBM Licensing Guide' },
+        { href: ROOT + 'general/general-severity.html',   label: 'IBM Severity Guide' }
+      ].forEach(function (item) {
+        var a = document.createElement('a');
+        a.className = 'list-group-item list-group-item-action bg-light';
+        a.href = item.href;
+        a.textContent = item.label;
+        section.appendChild(a);
+      });
+    })();
+    _rebuildDirectSidebar('section-db2', 'db2', 'db2');
+    // Legacy: section rows with chevron, topics as direct links (flat taxonomy)
+    (function () {
+      var dsSection = document.getElementById('section-ds');
+      if (!dsSection) return;
+      dsSection.innerHTML = '';
+      [
+        { key: 'datastage',        prefix: 'legacy-datastage',    label: 'DataStage' },
+        { key: 'cdc',              prefix: 'legacy-cdc',          label: 'CDC' },
+        { key: 'dataVirtualization', prefix: 'legacy-dv',         label: 'Data Virtualization' },
+        { key: 'productHub',       prefix: 'legacy-producthub',   label: 'Product Hub' }
+      ].forEach(function (prod) {
+        _appendSidebarBranch(dsSection, 0, prod.prefix, prod.label, function (productPages) {
+          _renderSidebarTaxonomyFlat(productPages, prod.key, prod.prefix, 1);
+        });
+      });
+    })();
+    // watsonx.data: section rows with chevron, topics as direct links (flat taxonomy)
+    (function () {
+      var wxSection = document.getElementById('section-wx');
+      if (!wxSection) return;
+      wxSection.innerHTML = '';
+      [
+        { key: 'lakehouse',    prefix: 'wx-lakehouse',    label: 'Lakehouse' },
+        { key: 'integration',  prefix: 'wx-integration',  label: 'Integration' },
+        { key: 'intelligence', prefix: 'wx-intelligence', label: 'Intelligence' }
+      ].forEach(function (prod) {
+        _appendSidebarBranch(wxSection, 0, prod.prefix, prod.label, function (productPages) {
+          _renderSidebarTaxonomyFlat(productPages, prod.key, prod.prefix, 1);
+        });
+      });
+    })();
+    // Guardium: section rows with chevron, topics as direct links
+    (function () {
+      var gdpSection = document.getElementById('section-gdp');
+      if (!gdpSection) return;
+      gdpSection.innerHTML = '';
+      [
+        { key: 'guardiumDataProtection', prefix: 'guardium-dp', label: 'Data Protection' },
+        { key: 'guardiumDiscover',        prefix: 'guardium-dc', label: 'Discover \u0026 Classify' },
+        { key: 'guardiumCrypto',          prefix: 'guardium-gcm', label: 'Cryptography Manager' }
+      ].forEach(function (prod) {
+        _appendSidebarBranch(gdpSection, 0, prod.prefix, prod.label, function (productPages) {
+          _renderSidebarTaxonomyFlat(productPages, prod.key, prod.prefix, 1);
+        });
+      });
+    })();
+    // Optim: flat taxonomy (same structure as OEM products)
+    (function () {
+      var optimSection = document.getElementById('section-optim');
+      if (!optimSection) return;
+      optimSection.innerHTML = '';
+      _renderSidebarTaxonomyFlat(optimSection, 'optim', 'optim', 0);
+    })();
+    // MDM: flat taxonomy (same structure as OEM products)
+    (function () {
+      var mdmSection = document.getElementById('section-mdm');
+      if (!mdmSection) return;
+      mdmSection.innerHTML = '';
+      _renderSidebarTaxonomyFlat(mdmSection, 'mdm', 'mdm', 0);
+    })();
+    // OEM: section rows with chevron, topics as direct links
+    (function () {
+      var oemSection = document.getElementById('section-oem');
+      if (!oemSection) return;
+      oemSection.innerHTML = '';
+      [
+        { key: 'edb',     prefix: 'oem-edb',     label: 'EDB PostgreSQL' },
+        { key: 'mongodb', prefix: 'oem-mongodb',  label: 'MongoDB' }
+      ].forEach(function (prod) {
+        _appendSidebarBranch(oemSection, 0, prod.prefix, prod.label, function (productPages) {
+          _renderSidebarTaxonomyFlat(productPages, prod.key, prod.prefix, 1);
+        });
+      });
+    })();
+  }
+
+  function _renderDashboardTaxonomy(host, productKey, prefix) {
+    if (!host) return;
+    host.innerHTML = '';
+    host.classList.add('dashboard-taxonomy');
+    host.setAttribute('data-dashboard-taxonomy', productKey);
+
+    var tabs = document.createElement('ul');
+    tabs.className = 'nav nav-tabs content-subcategory-tabs dashboard-category-tabs';
+    tabs.setAttribute('role', 'tablist');
+
+    var content = document.createElement('div');
+    content.className = 'tab-content content-category-content dashboard-category-content';
+
+    _CONTENT_SECTIONS.forEach(function (section, sectionIndex) {
+      var tabId = prefix + '-taxonomy-' + section.key;
+      var item = document.createElement('li');
+      item.className = 'nav-item';
+
+      var tab = document.createElement('a');
+      tab.className = 'nav-link' + (sectionIndex === 0 ? ' active' : '');
+      tab.id = tabId + '-tab';
+      tab.href = '#' + tabId;
+      tab.textContent = section.label;
+      tab.setAttribute('data-toggle', 'tab');
+      tab.setAttribute('role', 'tab');
+      tab.setAttribute('aria-controls', tabId);
+      tab.setAttribute('aria-selected', sectionIndex === 0 ? 'true' : 'false');
+      item.appendChild(tab);
+      tabs.appendChild(item);
+
+      var pane = document.createElement('div');
+      pane.className = 'tab-pane fade' + (sectionIndex === 0 ? ' show active' : '');
+      pane.id = tabId;
+      pane.setAttribute('role', 'tabpanel');
+      pane.setAttribute('aria-labelledby', tab.id);
+
+      var topicList = document.createElement('div');
+      topicList.className = 'dashboard-topic-list';
+      section.topics.forEach(function (topic) {
+        var row = document.createElement('section');
+        row.className = 'dashboard-topic-row';
+
+        var heading = document.createElement('h3');
+        heading.textContent = topic.label;
+        row.appendChild(heading);
+
+        var links = _topicLinks(productKey, section.key, topic.key);
+        if (links.length) {
+          var list = document.createElement('ul');
+          list.className = 'dashboard-topic-links';
+          links.forEach(function (link) {
+            var li = document.createElement('li');
+            var anchor = document.createElement('a');
+            anchor.href = link.href;
+            anchor.textContent = link.label;
+            li.appendChild(anchor);
+            list.appendChild(li);
+          });
+          row.appendChild(list);
+        } else {
+          var wip = document.createElement('p');
+          wip.className = 'dashboard-topic-wip';
+          wip.textContent = 'Work in progress';
+          row.appendChild(wip);
+        }
+
+        topicList.appendChild(row);
+      });
+      pane.appendChild(topicList);
+      content.appendChild(pane);
+    });
+
+    host.appendChild(tabs);
+    host.appendChild(content);
+  }
+
+  function _replaceDashboardPane(selector, productKey, prefix) {
+    var pane = document.querySelector(selector);
+    if (!pane) return;
+    // Skip panes that already use the page-nav-tabs design (real page links)
+    if (pane.getAttribute('data-page-nav') === 'true') return;
+    var intro = pane.querySelector(':scope > .content-product-intro');
+    Array.from(pane.children).forEach(function (child) {
+      if (child !== intro) pane.removeChild(child);
+    });
+    var host = document.createElement('div');
+    pane.appendChild(host);
+    _renderDashboardTaxonomy(host, productKey, prefix);
+  }
+
+  function _applyUnifiedDashboardTaxonomy() {
+    var db2Tabs = document.getElementById('db2-category-tabs');
+    var db2Content = document.getElementById('db2-category-content');
+    if (db2Tabs && db2Content && db2Tabs.parentNode) {
+      var db2Host = document.createElement('div');
+      db2Tabs.parentNode.insertBefore(db2Host, db2Tabs);
+      db2Tabs.parentNode.removeChild(db2Tabs);
+      db2Content.parentNode.removeChild(db2Content);
+      _renderDashboardTaxonomy(db2Host, 'db2', 'dashboard-db2');
+    }
+
+    _replaceDashboardPane('#infosphere-datastage', 'datastage', 'dashboard-datastage');
+    _replaceDashboardPane('#infosphere-cdc', 'cdc', 'dashboard-cdc');
+    _replaceDashboardPane('#legacy-datavirtualization', 'dataVirtualization', 'dashboard-dv');
+    _replaceDashboardPane('#legacy-producthub', 'productHub', 'dashboard-producthub');
+
+    var groupConfigs = {
+      'watsonx.data (Lakehouse)': ['lakehouse', 'dashboard-lakehouse'],
+      'watsonx.data Integration': ['integration', 'dashboard-integration'],
+      'watsonx.data Intelligence': ['intelligence', 'dashboard-intelligence'],
+      'Guardium Data Protection': ['guardiumDataProtection', 'dashboard-guardium-dp'],
+      'Guardium Discover & Classify': ['guardiumDiscover', 'dashboard-guardium-dc'],
+      'Guardium Cryptography Manager': ['guardiumCrypto', 'dashboard-guardium-gcm'],
+      'EDB PostgreSQL': ['edb', 'dashboard-edb'],
+      'MongoDB': ['mongodb', 'dashboard-mongodb'],
+      'Optim': ['optim', 'dashboard-optim'],
+      'Master Data Management': ['mdm', 'dashboard-mdm']
+    };
+
+    document.querySelectorAll('.grp-product').forEach(function (product) {
+      var heading = product.querySelector('.grp-product-label strong');
+      var pages = product.querySelector('.grp-pages');
+      var config = heading && groupConfigs[heading.textContent.trim()];
+      if (pages && config) _renderDashboardTaxonomy(pages, config[0], config[1]);
+    });
+
+    var generalPanel = document.getElementById('tab-general');
+    var generalContainer = generalPanel && generalPanel.querySelector('.container-fluid');
+    if (generalContainer && generalPanel.getAttribute('data-page-nav') !== 'true') {
+      generalContainer.querySelectorAll('.grp-product').forEach(function (product) {
+        product.parentNode.removeChild(product);
+      });
+      var generalHost = document.createElement('div');
+      generalHost.className = 'general-dashboard-taxonomy';
+      generalContainer.appendChild(generalHost);
+      _renderDashboardTaxonomy(generalHost, 'general', 'dashboard-general');
+    }
+  }
+
+  _applyUnifiedSidebarTaxonomy();
+  _applyUnifiedDashboardTaxonomy();
 
   function _setupSidebarExpandAll() {
     var sidebar = document.getElementById('sidebar-wrapper');
@@ -1069,10 +2302,12 @@
       var topLevel = Array.from(sidebar.querySelectorAll('.sidebar-section-label'));
       var products = Array.from(sidebar.querySelectorAll('.snav-product-row'));
       var categories = Array.from(sidebar.querySelectorAll('.snav-category-row'));
+      var subcategories = Array.from(sidebar.querySelectorAll('.snav-subcategory-row'));
       return topLevel.length > 0
         && topLevel.every(function (row) { return !row.classList.contains('collapsed'); })
         && products.every(function (row) { return row.classList.contains('open'); })
-        && categories.every(function (row) { return row.classList.contains('open'); });
+        && categories.every(function (row) { return row.classList.contains('open'); })
+        && subcategories.every(function (row) { return row.classList.contains('open'); });
     }
 
     function updateButton() {
@@ -1093,7 +2328,7 @@
         items.style.height = expand ? 'auto' : '0';
       });
 
-      sidebar.querySelectorAll('.snav-product-row, .snav-category-row').forEach(function (row) {
+      sidebar.querySelectorAll('.snav-product-row, .snav-category-row, .snav-subcategory-row').forEach(function (row) {
         var pages = row.nextElementSibling;
         row.classList.toggle('open', expand);
         if (pages) pages.style.height = expand ? 'auto' : '0';
@@ -1107,7 +2342,7 @@
     });
 
     sidebar.addEventListener('click', function (event) {
-      if (!event.target.closest('.sidebar-section-label, .snav-product-row, .snav-category-row')) return;
+      if (!event.target.closest('.sidebar-section-label, .snav-product-row, .snav-category-row, .snav-subcategory-row')) return;
       requestAnimationFrame(updateButton);
     });
 
@@ -1115,6 +2350,24 @@
   }
 
   _setupSidebarExpandAll();
+
+  // ── Per-page update footnote ───────────────────────────────────────
+  function _appendLastUpdatedFooter() {
+    var page = document.getElementById('page-content-wrapper');
+    var meta = document.querySelector('meta[name="last-updated"]');
+    if (!page || !meta || page.querySelector('.wiki-page-footer')) return;
+
+    var date = (meta.getAttribute('content') || '').trim();
+    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(date)) return;
+
+    var footer = document.createElement('footer');
+    footer.className = 'wiki-page-footer';
+    footer.setAttribute('aria-label', 'Page update information');
+    footer.textContent = 'Last updated: ' + date;
+    page.appendChild(footer);
+  }
+
+  _appendLastUpdatedFooter();
 
   // ── 5. Toggle sidebar ─────────────────────────────────────────────────
   if (!window.__menuToggleRegistered) {
@@ -1128,16 +2381,19 @@
   (function () {
     var fullPath = window.location.pathname;
     var page = fullPath.split('/').pop() || 'index.html';
+    var matchFound = false;
 
     document.querySelectorAll('#sidebar-wrapper .list-group-item').forEach(function (a) {
+      if (matchFound) return;
       var href      = a.getAttribute('href') || '';
-      var hrefClean = href.split('?')[0];
+      var hrefClean = href.split('?')[0].split('#')[0];
       var hrefFile  = hrefClean.split('/').pop();
       var isIndex   = (hrefFile === 'index.html');
       var isMatch   = isIndex
         ? fullPath.endsWith('/' + hrefClean.replace(/^(\.\.\/)+/, ''))
         : (hrefFile === page);
       if (!isMatch) return;
+      matchFound = true;
 
       a.classList.add('sidebar-active');
       var items = a.closest('.sidebar-section-items');
@@ -1150,6 +2406,12 @@
 
       var snavPages = a.closest('.snav-product-pages');
       var snavCategoryPages = a.closest('.snav-category-pages');
+      var snavSubcategoryPages = a.closest('.snav-subcategory-pages');
+      if (snavSubcategoryPages) {
+        snavSubcategoryPages.style.height = 'auto';
+        var snavSubcategoryRow = snavSubcategoryPages.previousElementSibling;
+        if (snavSubcategoryRow && snavSubcategoryRow.classList.contains('snav-subcategory-row')) snavSubcategoryRow.classList.add('open');
+      }
       if (snavCategoryPages) {
         snavCategoryPages.style.height = 'auto';
         var snavCategoryRow = snavCategoryPages.previousElementSibling;
@@ -1163,82 +2425,95 @@
     });
   })();
 
-  // ── 7. Snav sub-product accordion ────────────────────────────────────
-  if (!window.__snavAccordionRegistered) {
-    window.__snavAccordionRegistered = true;
-    document.querySelectorAll('.snav-product-row').forEach(function (row) {
-      row.addEventListener('click', function () {
-        var pages   = row.nextElementSibling; // .snav-product-pages
-        var isOpen  = row.classList.contains('open');
+  // ── 7–9. Snav accordion — single delegated listener on the sidebar ───
+  // Using event delegation so dynamically-created rows (built by
+  // _applyUnifiedSidebarTaxonomy) are always handled without needing a
+  // second querySelectorAll pass or registration guards.
+  (function () {
+    var sidebar = document.getElementById('sidebar-wrapper');
+    if (!sidebar || sidebar.getAttribute('data-snav-delegated')) return;
+    sidebar.setAttribute('data-snav-delegated', 'true');
+
+    sidebar.addEventListener('click', function (e) {
+      var row = e.target.closest('.snav-product-row, .snav-category-row, .snav-subcategory-row');
+      if (!row) return;
+      e.stopPropagation();
+
+      var isOpen   = row.classList.contains('open');
+      var pages    = row.nextElementSibling;
+      if (!pages) return;
+
+      // ── product-row (level 0: e.g. "Integration", "DataStage") ──────
+      if (row.classList.contains('snav-product-row')) {
+        // Close other open product-rows in the same section
         var section = row.closest('.sidebar-section-items');
-
-        // Collapse any other open sibling in the same section
-        section.querySelectorAll('.snav-product-row.open').forEach(function (other) {
-          if (other === row) return;
-          other.classList.remove('open');
-          var op = other.nextElementSibling;
-          op.style.height = op.getBoundingClientRect().height + 'px';
-          requestAnimationFrame(function () { requestAnimationFrame(function () { op.style.height = '0'; }); });
-        });
-
-        if (isOpen) {
-          row.classList.remove('open');
-          pages.style.height = pages.getBoundingClientRect().height + 'px';
-          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = '0'; }); });
-        } else {
-          row.classList.add('open');
-          pages.style.height = '0';
-          var target = pages.scrollHeight + 'px';
-          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = target; }); });
-          pages.addEventListener('transitionend', function once() {
-            pages.removeEventListener('transitionend', once);
-            if (row.classList.contains('open')) pages.style.height = 'auto';
+        if (section) {
+          section.querySelectorAll('.snav-product-row.open').forEach(function (other) {
+            if (other === row) return;
+            other.classList.remove('open');
+            var op = other.nextElementSibling;
+            if (op) op.style.height = '0';
           });
         }
-      });
-    });
-  }
+        if (isOpen) {
+          row.classList.remove('open');
+          pages.style.height = '0';
+        } else {
+          row.classList.add('open');
+          pages.style.height = 'auto';
+        }
+        return;
+      }
 
-  // ── 8. Snav nested category accordion ────────────────────────────────
-  if (!window.__snavCategoryAccordionRegistered) {
-    window.__snavCategoryAccordionRegistered = true;
-    document.querySelectorAll('.snav-category-row').forEach(function (row) {
-      row.addEventListener('click', function () {
-        var pages = row.nextElementSibling; // .snav-category-pages
-        var isOpen = row.classList.contains('open');
+      // ── category-row (level 1: e.g. "Overview", "Operations") ───────
+      if (row.classList.contains('snav-category-row')) {
         var productPages = row.closest('.snav-product-pages');
-
-        Array.from(productPages.children).forEach(function (other) {
-          if (other === row || !other.classList || !other.classList.contains('snav-category-row') || !other.classList.contains('open')) return;
-          other.classList.remove('open');
-          var otherPages = other.nextElementSibling;
-          otherPages.style.height = otherPages.getBoundingClientRect().height + 'px';
-          requestAnimationFrame(function () { requestAnimationFrame(function () { otherPages.style.height = '0'; }); });
-        });
-
-        if (isOpen) {
-          row.classList.remove('open');
-          pages.style.height = pages.getBoundingClientRect().height + 'px';
-          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = '0'; }); });
-        } else {
-          row.classList.add('open');
-          pages.style.height = '0';
-          var target = pages.scrollHeight + 'px';
-          requestAnimationFrame(function () { requestAnimationFrame(function () { pages.style.height = target; }); });
-          pages.addEventListener('transitionend', function once() {
-            pages.removeEventListener('transitionend', once);
-            if (row.classList.contains('open')) pages.style.height = 'auto';
+        // Close other open category-rows in the same product panel
+        if (productPages) {
+          Array.from(productPages.children).forEach(function (other) {
+            if (other === row || !other.classList.contains('snav-category-row') || !other.classList.contains('open')) return;
+            other.classList.remove('open');
+            var op = other.nextElementSibling;
+            if (op) op.style.height = '0';
           });
-        }
-
-        if (productPages && productPages.style.height !== 'auto') {
           productPages.style.height = 'auto';
         }
-      });
-    });
-  }
+        if (isOpen) {
+          row.classList.remove('open');
+          pages.style.height = '0';
+        } else {
+          row.classList.add('open');
+          pages.style.height = 'auto';
+        }
+        return;
+      }
 
-  // ── 9. Smooth accordion sidebar sections ─────────────────────────────
+      // ── subcategory-row (level 2) ────────────────────────────────────
+      if (row.classList.contains('snav-subcategory-row')) {
+        var catPages = row.closest('.snav-category-pages');
+        if (catPages) {
+          Array.from(catPages.children).forEach(function (other) {
+            if (other === row || !other.classList.contains('snav-subcategory-row') || !other.classList.contains('open')) return;
+            other.classList.remove('open');
+            var op = other.nextElementSibling;
+            if (op) op.style.height = '0';
+          });
+          catPages.style.height = 'auto';
+        }
+        var prodPages = row.closest('.snav-product-pages');
+        if (prodPages) prodPages.style.height = 'auto';
+        if (isOpen) {
+          row.classList.remove('open');
+          pages.style.height = '0';
+        } else {
+          row.classList.add('open');
+          pages.style.height = 'auto';
+        }
+      }
+    });
+  })();
+
+  // ── 10. Smooth accordion sidebar sections ────────────────────────────
   (function () {
     var labels = Array.from(document.querySelectorAll('.sidebar-section-label'));
 

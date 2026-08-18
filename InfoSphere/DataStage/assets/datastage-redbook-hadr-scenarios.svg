@@ -1,0 +1,148 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">InfoSphere Information Server Redbook deployment scenarios</title>
+  <desc id="desc">Comparison of the simple, mixed, and complex deployment scenarios, emphasizing active-passive availability, clustered services, and shared grid compute.</desc>
+  <defs>
+    <style>
+      .title { font: 700 24px Arial, sans-serif; fill: #20252b; }
+      .subtitle { font: 400 13px Arial, sans-serif; fill: #59636e; }
+      .card { fill: #ffffff; stroke: #c8d0d8; stroke-width: 1.5; }
+      .header1 { fill: #e8f1ff; }
+      .header2 { fill: #e6f6f0; }
+      .header3 { fill: #fff2db; }
+      .scenario { font: 700 18px Arial, sans-serif; fill: #20252b; }
+      .context { font: 400 12px Arial, sans-serif; fill: #59636e; }
+      .label { font: 700 12px Arial, sans-serif; fill: #343a40; }
+      .small { font: 400 11px Arial, sans-serif; fill: #343a40; }
+      .node { fill: #f7f9fb; stroke: #75808b; stroke-width: 1.2; }
+      .active { fill: #e8f1ff; stroke: #1261a0; stroke-width: 1.4; }
+      .passive { fill: #f4f5f6; stroke: #75808b; stroke-width: 1.2; stroke-dasharray: 5 4; }
+      .shared { fill: #e6f6f0; stroke: #147d64; stroke-width: 1.2; }
+      .compute { fill: #fff2db; stroke: #b36b00; stroke-width: 1.2; }
+      .line { fill: none; stroke: #65717d; stroke-width: 1.4; }
+      .dash { fill: none; stroke: #65717d; stroke-width: 1.3; stroke-dasharray: 5 4; }
+      .arrow { fill: #65717d; }
+      .note { font: 700 11px Arial, sans-serif; fill: #1261a0; }
+    </style>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" class="arrow"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="650" fill="#ffffff"/>
+  <text x="30" y="38" class="title">Redbook deployment scenarios: availability focus</text>
+  <text x="30" y="62" class="subtitle">Three workload-driven patterns from SG24-8028 Chapter 6. Each environment can use a different availability mechanism.</text>
+
+  <!-- Scenario 1 -->
+  <rect x="30" y="88" width="360" height="500" rx="4" class="card"/>
+  <rect x="30" y="88" width="360" height="72" rx="4" class="header1"/>
+  <text x="50" y="116" class="scenario">1. Simple</text>
+  <text x="50" y="139" class="context">Small team; HA required only for production</text>
+
+  <text x="50" y="192" class="label">Development</text>
+  <rect x="145" y="173" width="215" height="38" rx="3" class="node"/>
+  <text x="252" y="197" text-anchor="middle" class="small">Services + repository + engine</text>
+  <text x="50" y="244" class="label">Test</text>
+  <rect x="145" y="225" width="215" height="38" rx="3" class="node"/>
+  <text x="252" y="249" text-anchor="middle" class="small">Services + repository + engine</text>
+
+  <text x="50" y="298" class="label">Production</text>
+  <rect x="50" y="315" width="110" height="42" rx="3" class="node"/>
+  <text x="105" y="333" text-anchor="middle" class="small">HA manager</text>
+  <text x="105" y="348" text-anchor="middle" class="small">virtual endpoint</text>
+  <path d="M160 336 H187" class="line" marker-end="url(#arrow)"/>
+  <rect x="190" y="300" width="170" height="54" rx="3" class="active"/>
+  <text x="275" y="323" text-anchor="middle" class="label">Active suite</text>
+  <text x="275" y="341" text-anchor="middle" class="small">all three server tiers</text>
+  <rect x="190" y="372" width="170" height="54" rx="3" class="passive"/>
+  <text x="275" y="395" text-anchor="middle" class="label">Passive suite</text>
+  <text x="275" y="413" text-anchor="middle" class="small">starts after fencing</text>
+  <path d="M275 354 V372" class="dash" marker-end="url(#arrow)"/>
+  <rect x="190" y="454" width="170" height="46" rx="3" class="shared"/>
+  <text x="275" y="474" text-anchor="middle" class="label">Protected shared state</text>
+  <text x="275" y="490" text-anchor="middle" class="small">repository + filesystem</text>
+  <path d="M275 426 V454" class="line"/>
+  <text x="50" y="540" class="note">Pattern: production active-passive</text>
+  <text x="50" y="559" class="small">Optimize for simplicity and controlled failover.</text>
+
+  <!-- Scenario 2 -->
+  <rect x="420" y="88" width="360" height="500" rx="4" class="card"/>
+  <rect x="420" y="88" width="360" height="72" rx="4" class="header2"/>
+  <text x="440" y="116" class="scenario">2. Mixed</text>
+  <text x="440" y="139" class="context">100+ developers; collaboration and concurrency</text>
+
+  <text x="440" y="191" class="label">UNIFIED environment</text>
+  <rect x="440" y="207" width="104" height="40" rx="3" class="node"/>
+  <text x="492" y="224" text-anchor="middle" class="small">HTTP / load</text>
+  <text x="492" y="239" text-anchor="middle" class="small">balancer</text>
+  <path d="M544 227 H566" class="line" marker-end="url(#arrow)"/>
+  <rect x="570" y="181" width="180" height="38" rx="3" class="active"/>
+  <text x="660" y="205" text-anchor="middle" class="small">Clustered services A + B</text>
+  <rect x="570" y="237" width="180" height="38" rx="3" class="shared"/>
+  <text x="660" y="261" text-anchor="middle" class="small">Shared metadata repository</text>
+  <path d="M660 219 V237" class="line"/>
+  <rect x="455" y="302" width="135" height="46" rx="3" class="node"/>
+  <text x="522" y="322" text-anchor="middle" class="label">DataStage engine</text>
+  <text x="522" y="338" text-anchor="middle" class="small">development data</text>
+  <rect x="610" y="302" width="140" height="46" rx="3" class="node"/>
+  <text x="680" y="322" text-anchor="middle" class="label">IA engine</text>
+  <text x="680" y="338" text-anchor="middle" class="small">production data</text>
+  <path d="M660 275 V290 H522 V302" class="line"/>
+  <path d="M660 275 V302" class="line"/>
+
+  <text x="440" y="389" class="label">Test and production</text>
+  <rect x="440" y="407" width="310" height="45" rx="3" class="passive"/>
+  <text x="595" y="427" text-anchor="middle" class="label">Active-passive suite pattern</text>
+  <text x="595" y="443" text-anchor="middle" class="small">test mirrors production failover design</text>
+  <text x="440" y="492" class="note">Pattern: clustered services + active-passive</text>
+  <text x="440" y="511" class="small">Scale concurrent web sessions; isolate engine access.</text>
+  <text x="440" y="530" class="small">Move production operational metadata to UNIFIED.</text>
+
+  <!-- Scenario 3 -->
+  <rect x="810" y="88" width="360" height="500" rx="4" class="card"/>
+  <rect x="810" y="88" width="360" height="72" rx="4" class="header3"/>
+  <text x="830" y="116" class="scenario">3. Complex</text>
+  <text x="830" y="139" class="context">High-volume ETL plus enterprise metadata reporting</text>
+
+  <text x="830" y="191" class="label">Development / test / production</text>
+  <rect x="830" y="207" width="96" height="64" rx="3" class="node"/>
+  <text x="878" y="226" text-anchor="middle" class="small">Services</text>
+  <text x="878" y="242" text-anchor="middle" class="small">repository</text>
+  <text x="878" y="258" text-anchor="middle" class="small">engine head</text>
+  <rect x="942" y="207" width="96" height="64" rx="3" class="node"/>
+  <text x="990" y="226" text-anchor="middle" class="small">Services</text>
+  <text x="990" y="242" text-anchor="middle" class="small">repository</text>
+  <text x="990" y="258" text-anchor="middle" class="small">engine head</text>
+  <rect x="1054" y="207" width="96" height="64" rx="3" class="node"/>
+  <text x="1102" y="226" text-anchor="middle" class="small">Services</text>
+  <text x="1102" y="242" text-anchor="middle" class="small">repository</text>
+  <text x="1102" y="258" text-anchor="middle" class="small">engine head</text>
+  <text x="878" y="288" text-anchor="middle" class="small">DEV</text>
+  <text x="990" y="288" text-anchor="middle" class="small">TEST</text>
+  <text x="1102" y="288" text-anchor="middle" class="small">PROD</text>
+  <rect x="858" y="313" width="264" height="43" rx="3" class="compute"/>
+  <text x="990" y="331" text-anchor="middle" class="label">Shared grid compute nodes</text>
+  <text x="990" y="347" text-anchor="middle" class="small">allocated by workload window</text>
+  <path d="M878 271 V313" class="line"/>
+  <path d="M990 271 V313" class="line"/>
+  <path d="M1102 271 V313" class="line"/>
+
+  <text x="830" y="393" class="label">Metadata reporting environment</text>
+  <rect x="830" y="410" width="104" height="40" rx="3" class="node"/>
+  <text x="882" y="427" text-anchor="middle" class="small">HTTP / load</text>
+  <text x="882" y="442" text-anchor="middle" class="small">balancer</text>
+  <path d="M934 430 H950" class="line" marker-end="url(#arrow)"/>
+  <rect x="954" y="397" width="196" height="38" rx="3" class="active"/>
+  <text x="1052" y="421" text-anchor="middle" class="small">Clustered services A + B</text>
+  <rect x="954" y="451" width="196" height="44" rx="3" class="shared"/>
+  <text x="1052" y="470" text-anchor="middle" class="small">Repository + IA engine</text>
+  <text x="1052" y="486" text-anchor="middle" class="small">co-located where practical</text>
+  <path d="M1052 435 V451" class="line"/>
+  <text x="830" y="530" class="note">Pattern: grid processing + reporting HA</text>
+  <text x="830" y="549" class="small">Scale ETL and metadata workloads independently.</text>
+
+  <rect x="30" y="610" width="14" height="14" class="active"/><text x="52" y="622" class="small">active or clustered</text>
+  <rect x="180" y="610" width="14" height="14" class="passive"/><text x="202" y="622" class="small">passive / failover</text>
+  <rect x="340" y="610" width="14" height="14" class="shared"/><text x="362" y="622" class="small">shared state</text>
+  <rect x="470" y="610" width="14" height="14" class="compute"/><text x="492" y="622" class="small">grid compute</text>
+  <text x="1170" y="622" text-anchor="end" class="context">Conceptual summary; not a current support matrix</text>
+</svg>

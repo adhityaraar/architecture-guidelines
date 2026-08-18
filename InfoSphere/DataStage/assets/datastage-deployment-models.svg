@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650" role="img" aria-labelledby="title desc">
+  <title id="title">DataStage metadata deployment model selection</title>
+  <desc id="desc">Decision path between simple, unified, reporting, and governance metadata deployment models.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#334155"/>
+    </marker>
+    <style>
+      text { font-family: Arial, sans-serif; fill: #17202a; letter-spacing: 0; }
+      .title { font-size: 26px; font-weight: 700; }
+      .q { fill: #eaf3ff; stroke: #2563eb; stroke-width: 2; }
+      .line { fill: none; stroke: #334155; stroke-width: 2.5; marker-end: url(#arrow); }
+      .model { stroke-width: 2; rx: 6; }
+      .label { font-size: 18px; font-weight: 700; }
+      .body { font-size: 14px; }
+      .small { font-size: 13px; fill: #475569; }
+    </style>
+  </defs>
+  <rect width="1200" height="650" fill="#ffffff"/>
+  <text x="40" y="48" class="title">Choose the metadata deployment model before placing product tiers</text>
+
+  <polygon points="600,82 770,142 600,202 430,142" class="q"/>
+  <text x="512" y="137" class="label">Using DataStage</text>
+  <text x="520" y="161" class="label">or QualityStage?</text>
+
+  <polygon points="360,245 540,310 360,375 180,310" class="q"/>
+  <text x="250" y="299" class="label">Need collaboration,</text>
+  <text x="234" y="323" class="label">profiling, or reporting?</text>
+
+  <polygon points="750,245 930,310 750,375 570,310" class="q"/>
+  <text x="644" y="299" class="label">Large user load or</text>
+  <text x="626" y="323" class="label">intricate governance?</text>
+
+  <path d="M500 180 C430 205 405 220 380 247" class="line"/>
+  <text x="428" y="213" class="small">Yes</text>
+  <path d="M700 180 C800 210 930 220 1010 260" class="line"/>
+  <text x="812" y="211" class="small">No</text>
+  <path d="M540 310 H570" class="line"/>
+  <text x="543" y="294" class="small">Yes</text>
+
+  <rect x="70" y="465" width="240" height="120" fill="#eaf8ef" stroke="#16835b" class="model"/>
+  <text x="92" y="501" class="label">SIMPLE</text>
+  <text x="92" y="531" class="body">Separate DEV / TEST / PROD</text>
+  <text x="92" y="555" class="body">Minimal metadata collaboration</text>
+
+  <rect x="350" y="465" width="240" height="120" fill="#fff6dc" stroke="#b7791f" class="model"/>
+  <text x="372" y="501" class="label">UNIFIED</text>
+  <text x="372" y="531" class="body">Collaborative metadata in DEV</text>
+  <text x="372" y="555" class="body">Production remains integration-only</text>
+
+  <rect x="630" y="465" width="240" height="120" fill="#f1edff" stroke="#7253c7" class="model"/>
+  <text x="652" y="501" class="label">REPORTING</text>
+  <text x="652" y="531" class="body">Dedicated reporting repository</text>
+  <text x="652" y="555" class="body">Isolates lineage and governance load</text>
+
+  <rect x="910" y="465" width="240" height="120" fill="#f3f4f6" stroke="#4b5563" class="model"/>
+  <text x="932" y="501" class="label">GOVERNANCE</text>
+  <text x="932" y="531" class="body">No DataStage / QualityStage</text>
+  <text x="932" y="555" class="body">Metadata and governance only</text>
+
+  <path d="M250 350 C205 405 190 425 190 465" class="line"/>
+  <text x="186" y="410" class="small">No</text>
+  <path d="M650 352 C550 405 470 420 470 465" class="line"/>
+  <text x="555" y="405" class="small">No</text>
+  <path d="M810 352 C820 405 750 420 750 465" class="line"/>
+  <text x="809" y="407" class="small">Yes</text>
+  <path d="M1010 260 V465" class="line"/>
+
+  <text x="40" y="628" class="small">Original synthesis based on the Redbook Chapter 5 selection logic. Validate capacity, licensing, and supported topology for the installed release.</text>
+</svg>
