@@ -15,6 +15,7 @@ Personal reference notes covering HA & DR architecture, operational runbooks, an
 | **InfoSphere** | DataStage parallel engine HA, CDC subscription topology, recovery procedures |
 | **watsonx.data** | Lakehouse engines & catalogs, Integration pipelines, Intelligence Knowledge Catalog |
 | **Guardium** | Data Protection (S-TAP/Collector HA), Discover & Classify, Cryptography Manager |
+| **Glossary** | Abbreviations and shared terminology for AI, data, governance, and infrastructure |
 
 ---
 

@@ -99,6 +99,16 @@
       db2page: 'db2/db2MustGather.html'
     },
     {
+      label: 'General Monitoring',
+      tab: 'tab-db2',
+      tabLabel: 'DB2',
+      badgeColor: '#7c5cd8',
+      badgeBg: '#ede9fb',
+      headings: ['General Monitoring', 'Capturing Short-Duration CPU Spikes', 'Interpreting a Post-Incident Snapshot', 'Runtime Data Collection Script (AIX)', 'Hang Capture — db2fodc -hang'],
+      body: 'Db2 monitoring general high CPU AIX db2pd db2mon db2fodc hang runtime capture EDU latch direct write Topas Instana RUNSTATS REORG',
+      db2page: 'db2/db2CpuMonitoring.html'
+    },
+    {
       label: 'CDC Sizing',
       tab: 'tab-infosphere',
       tabLabel: 'LEGACY',
@@ -1016,6 +1026,44 @@
     list.appendChild(items);
   }
 
+  function _ensureGlossarySidebarSection() {
+    _ensureTopLevelSection(
+      'section-glossary',
+      'glossary',
+      'Glossary',
+      ROOT + 'index.html#glossary-abreviation',
+      'Abreviation'
+    );
+
+    var section = document.getElementById('section-glossary');
+    if (!section || section.getAttribute('data-glossary-built') === 'true') return;
+
+    var glossaryItems = [
+      { pane: 'glossary-abreviation', label: 'Abreviation' },
+      { pane: 'glossary-data', label: 'Data' },
+      { pane: 'glossary-ai', label: 'Artificial Intelligence' },
+      { pane: 'glossary-governance', label: 'Governance' },
+      { pane: 'glossary-infrastructure', label: 'Infrastructure' },
+      { pane: 'glossary-others', label: 'Others' }
+    ];
+
+    section.innerHTML = '';
+    glossaryItems.forEach(function (item) {
+      var link = _createSidebarLink(ROOT + 'index.html#' + item.pane, item.label);
+      link.setAttribute('data-glossary-pane', item.pane);
+      link.addEventListener('click', function (event) {
+        if (!document.getElementById('tab-glossary') ||
+            typeof switchTab !== 'function' ||
+            typeof switchGlossaryPane !== 'function') return;
+        event.preventDefault();
+        switchTab('tab-glossary');
+        switchGlossaryPane(item.pane, true);
+      });
+      section.appendChild(link);
+    });
+    section.setAttribute('data-glossary-built', 'true');
+  }
+
   function _augmentTopLevelSidebar() {
     _ensureTopLevelSection('section-optim', 'optim', 'Optim', ROOT + 'Optim/optim-overview.html', 'Overview');
     var optimPages = document.getElementById('section-optim');
@@ -1348,7 +1396,10 @@
       },
       operations: {
         'day-to-day': [L('db2/hadrCommands.html', 'Routine HADR Commands'), L('db2/hadrTakeover.html', 'Takeover and Role Management')],
-        'monitoring': [L('db2/hadrMonitoring.html', 'HADR Monitoring')],
+        'monitoring': [
+          L('db2/db2CpuMonitoring.html', 'General'),
+          L('db2/hadrMonitoring.html', 'HADR')
+        ],
         'performance': [L('db2/hadrPerf.html', 'HADR Performance'), L('db2/perfTuning.html', 'Db2 Performance Tuning'), L('db2/tcpTuning.html', 'Network Tuning')],
         'maintenance': [L('db2/hadrCommands.html', 'Startup, Shutdown, and Role Operations')],
         'backup-recovery': [L('db2/hadrTakeover.html', 'Takeover and Recovery Procedures')],
@@ -2137,6 +2188,7 @@
         });
       });
     })();
+    _ensureGlossarySidebarSection();
   }
 
   function _renderDashboardTaxonomy(host, productKey, prefix) {
@@ -2386,6 +2438,7 @@
     document.querySelectorAll('#sidebar-wrapper .list-group-item').forEach(function (a) {
       if (matchFound) return;
       var href      = a.getAttribute('href') || '';
+      if (href.indexOf('#glossary-') !== -1 && window.location.hash !== '#' + href.split('#')[1]) return;
       var hrefClean = href.split('?')[0].split('#')[0];
       var hrefFile  = hrefClean.split('/').pop();
       var isIndex   = (hrefFile === 'index.html');

@@ -32,6 +32,7 @@ const PAGES = [
   { label:'HADR Takeover',             file:'db2/hadrTakeover.html',    tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/hadrTakeover.html' },
   { label:'HADR Log Shipping',         file:'db2/hadrLogShipping.html', tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/hadrLogShipping.html' },
   { label:'HADR Monitoring',           file:'db2/hadrMonitoring.html',  tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/hadrMonitoring.html' },
+  { label:'General Monitoring',        file:'db2/db2CpuMonitoring.html',tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/db2CpuMonitoring.html', keywords:'Db2 monitoring general high CPU AIX db2pd db2mon db2fodc hang runtime capture EDU latch direct write Topas Instana RUNSTATS REORG' },
   { label:'HADR Commands',             file:'db2/hadrCommands.html',    tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/hadrCommands.html' },
   { label:'HADR Perf',                 file:'db2/hadrPerf.html',        tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/hadrPerf.html' },
   { label:'Client Reroute',            file:'db2/clientReroute.html',   tab:'tab-db2', tabLabel:'DB2', badgeColor:'#7c5cd8', badgeBg:'#ede9fb', db2page:'db2/clientReroute.html' },
