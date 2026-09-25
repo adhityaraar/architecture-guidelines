@@ -434,6 +434,84 @@
   <a href="https://s3.us.cloud-object-storage.appdomain.cloud/sw-licensing-admin-prod-public/guides/licensing_guides/5/1/Backup.pdf">View PDF</a>
 </p>
 
+<h2>IBM Db2 AI Advanced Edition — VPC Sizing Example</h2>
+<p class="text-muted" style="font-size:13px;">Example VPC licence quantities for a 2-server HADR topology (DC + DRC), using cold standby — <strong>no licence required for the cold standby copy</strong>.</p>
+
+<h3>VM Based</h3>
+<table class="table table-bordered table-sm">
+  <thead class="thead-dark">
+    <tr>
+      <th style="width:4%">No</th>
+      <th>Server Option</th>
+      <th style="width:10%"># Servers</th>
+      <th style="width:12%">vCPU per VM</th>
+      <th style="width:8%">PN</th>
+      <th>Description</th>
+      <th style="width:9%">Qty (VPC)</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>Power S1122/24</td>
+      <td>2</td>
+      <td>4</td>
+      <td>D14SPZX</td>
+      <td>IBM Db2 AI Advanced Edition Virtual Processor Core LIC + SW S&amp;S 12 MO</td>
+      <td>8</td>
+      <td>DC: 4 Primary, 4 Standby (cold)<br/>DRC: 4 Primary, 4 Standby (cold)</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td>x86 Servers</td>
+      <td>2</td>
+      <td>12</td>
+      <td>D14SPZX</td>
+      <td>IBM Db2 AI Advanced Edition Virtual Processor Core LIC + SW S&amp;S 12 MO</td>
+      <td>24</td>
+      <td>DC: 12 Primary, 12 Standby (cold)<br/>DRC: 12 Primary, 12 Standby (cold)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>OpenShift on x86</h3>
+<table class="table table-bordered table-sm">
+  <thead class="thead-dark">
+    <tr>
+      <th style="width:4%">No</th>
+      <th>Server Option</th>
+      <th style="width:12%"># DB2 Instance</th>
+      <th style="width:14%">vCPU per Instance</th>
+      <th style="width:8%">PN</th>
+      <th>Description</th>
+      <th style="width:9%">Qty (VPC)</th>
+      <th>Note</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td>
+      <td>x86 Servers</td>
+      <td>2</td>
+      <td>6</td>
+      <td>D14N1ZX</td>
+      <td>IBM Db2 AI Advanced Edition Cartridge Virtual Processor Core LIC + SW S&amp;S 12 MO</td>
+      <td>12</td>
+      <td>DC: 6 Primary, 6 Standby (cold)<br/>DRC: 6 Primary, 6 Standby (cold)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout info" style="font-size:13px; margin-top:8px;">
+  <strong>Notes</strong>
+  <ul style="margin-bottom:0; padding-left:18px; margin-top:6px;">
+    <li>x86 sizing is calculated using an internal sizing calculator, based on the equivalent of IBM Power S1122.</li>
+    <li>For OpenShift on x86 hardware with Intel <em>Hyper-Threading enabled</em> (SMT=2), 1 physical core provides 2 logical CPUs (vCPUs). Therefore, 2 vCPUs = 1 physical core = 1 VPC.</li>
+    <li>No licence required if <em>cold standby</em>.</li>
+  </ul>
+</div>
+
     </div>
   </div>
 </div>

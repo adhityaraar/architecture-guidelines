@@ -1400,7 +1400,12 @@
           L('db2/db2CpuMonitoring.html', 'General'),
           L('db2/hadrMonitoring.html', 'HADR')
         ],
-        'performance': [L('db2/hadrPerf.html', 'HADR Performance'), L('db2/perfTuning.html', 'Db2 Performance Tuning'), L('db2/tcpTuning.html', 'Network Tuning')],
+        'performance': [
+          L('db2/hadrPerf.html', 'HADR Performance'),
+          L('db2/perfTuning.html', 'Db2 Performance Tuning'),
+          L('db2/tcpTuning.html', 'Network Tuning'),
+          L('db2/db2WorkloadManagement.html', 'Workload Management')
+        ],
         'maintenance': [L('db2/hadrCommands.html', 'Startup, Shutdown, and Role Operations')],
         'backup-recovery': [L('db2/hadrTakeover.html', 'Takeover and Recovery Procedures')],
         'ha-dr-operations': [L('db2/hadrTakeover.html', 'Planned and Forced Takeover'), L('db2/hadrCommands.html', 'HADR Operational Commands')],
